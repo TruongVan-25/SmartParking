@@ -1,0 +1,1 @@
+"C:\Users\Admin\AppData\Local\Programs\Python\Python37\python.exe" "E:\webXAMPP\robotic\admin\video-record.py"

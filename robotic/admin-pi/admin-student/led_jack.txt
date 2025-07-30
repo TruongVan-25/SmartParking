@@ -1,0 +1,4 @@
+led1 (Bedroom Light): 6
+led2 (Kitchen Light): 13
+led3 (Bathroom Light): 19
+led4 (Table Light): 26
