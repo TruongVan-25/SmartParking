@@ -18,9 +18,9 @@
 <div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px;">
 	<div class="row">
 		<div class="col-sm-3">				
-			<h1 class="sub-1">ROBOT CONTROL PANEL</h1>
+			<h1 class="sub-1">SMART PARKING</h1>
 			<div class="column cyan">
-				<h1 class="sub-1">ROBOT DIRECTION CONTROL</h1>
+				<h1 class="sub-1">SENSOR CAMERA</h1>
 				<button id="robot_forward" class="btn btn-success" style="padding: 0px"><img style="height: 40px" src="image/forward.png"></button> <br>
 				<button id="robot_left" class="btn btn-success" style="padding: 0px"><img style="height: 40px"src="image/left.png"></button>
 				<button id="buzzer_on" class="btn btn-success" style="padding: 0px" data-toggle="tooltip" title="Turn speaker ON!"><img style="height: 60px; border-radius: 3px;"
