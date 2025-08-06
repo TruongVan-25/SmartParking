@@ -18,51 +18,31 @@
 <div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px;">
 	<div class="row">
 		<div class="col-sm-3">				
-			<h1 class="sub-1">SMART PARKING</h1>
+			<h1 class="sub-1">GATE CONTROL PANEL</h1>
 			<div class="column cyan">
-				<h1 class="sub-1">SENSOR CAMERA</h1>
-				<button id="robot_forward" class="btn btn-success" style="padding: 0px"><img style="height: 40px" src="image/forward.png"></button> <br>
-				<button id="robot_left" class="btn btn-success" style="padding: 0px"><img style="height: 40px"src="image/left.png"></button>
-				<button id="buzzer_on" class="btn btn-success" style="padding: 0px" data-toggle="tooltip" title="Turn speaker ON!"><img style="height: 60px; border-radius: 3px;"
-					src="image/speaker.png"></button>
-				<button id="robot_right" class="btn btn-success" style="padding: 0px"><img style="height: 40px"src="image/right.png"></button> <br>
-				<button id="robot_back" class="btn btn-success" style="padding: 0px"><img style="height: 40px"src="image/back.png"></button>
+				<h2>GATE CONTROL</h2>
+				<button id="open_gate" class="btn btn-success">Open Gate</button>
+				<button id="close_gate" class="btn btn-danger">Close Gate</button>
 			</div>			
 
-			<div class="column blue">
-				<h2 class="sub-1">CAMERA POSITION CONTROL</h2>
-				<button id="camera_up" class="btn btn-primary" style="padding: 0px"><img style="height: 40px" src="image/forward.png"></button> <br>
-				<button id="camera_left" class="btn btn-primary" style="padding: 0px"><img style="height: 40px"src="image/left.png"></button>
-				<button id="camera_center" class="btn btn-primary" style="padding: 0px" data-toggle="tooltip" title="Turn camera to center position!"><img style="height: 60px"src="image/center.png"></button>
-				<button id="camera_right" class="btn btn-primary" style="padding: 0px"><img style="height: 40px"src="image/right.png"></button> <br>
-				<button id="camera_down" class="btn btn-primary" style="padding: 0px"><img style="height: 40px"src="image/back.png"></button>
-			</div>
-			<div style="text-align: center; padding: 5px">			
-				<!-- <button id="take_photo" class="btn btn-success" style="font-size: 20px;">Take Photo</button>				 -->
-				<!-- <button id="video_record" class="btn btn-success" style="font-size: 20px;">Take Video</button>	 -->
-				
-				<button id="light_on" class="btn btn-success" data-toggle="tooltip" title="Turn light ON!"><img style="height: 30px" src="image/lighton.png"></button>
-				<button id="light_off" class="btn" data-toggle="tooltip" title="Turn light OFF!"><img style="height: 30px"src="image/lightoff.png"></button>
+			<h2 class="sub-1">TOTAL AVAILABLE SLOTS: <span id="available-count">0</span></h2>
+
+			<div class="parking-area" style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff;">
+				<div id="slot-container" class="grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
 			</div>
 		</div> <!-- end of col-3 -->
 
 		<div class="col-sm-6" style="text-align: center; padding: 0px;">			
-			<h1 class="sub-1">REAL-TIME VIDEO MONITORING</h1>
-			<div id="stream_windows" style="padding: 3px; text-align: center;">
-				<!-- <iframe width="90%" height="500" style="border: 1px solid #cccccc;" src="https://www.youtube.com/embed/5dJG_DdOuOM?wmode=transparent"></iframe> -->
-				<iframe width="100%" height="480" style="text-align: center; padding: 3px; border: 1px solid red" src="https://172.16.10.21:8443/"></iframe>
-				<!-- <iframe id="video_feed" width="100%" height="480" style="text-align: center; padding: 3px; border: 1px solid red" src="http://192.168.1.112:8000/stream.mjpg"></iframe> -->
-			</div>
-			<div style="text-align: center;">
-				<button id="start_stream_video" class="btn btn-success" data-toggle="tooltip" title="Start live video!" style="padding: 0px; width: 60px;"><img style="height: 40px"src="image/camera_on.png"></button>
-				<button id="stop_stream_video" class="btn" style="padding: 0px;" data-toggle="tooltip" title="Stop live video!"><img style="height: 40px"src="image/camera_off.png"></button>
-				<button id="take_photo" class="btn btn-primary" style="padding: 0px; width: 60px; background-color: #006289;" data-toggle="tooltip" title="Take photo!"><img style="height: 40px; "src="image/take_photo.png"></button>		
-				<button id="video_record" class="btn btn-primary" style="padding: 0px; width: 60px;background-color: #006289;" data-toggle="tooltip" title="Start video record!"><img style="height: 40px;"src="image/record.png"></button>
-				<button id="start_sensor" class="btn btn-success" style="padding: 0px; width: 60px" data-toggle="tooltip" title="Enable sensor!"><img style="height: 40px;" src="image/sensor.png"></button>
-				<button id="stop_sensor" class="btn" style="padding: 0px; width: 60px;" data-toggle="tooltip" title="Disable sensor!"><img style="height: 40px; border-color: #006289;"src="image/sensor.png"></button>
-				<button id="start_detection" class="btn btn-warning" style="padding: 0px;width: 60px;" data-toggle="tooltip" title="Enable object detection!"><img style="height: 40px"src="image/detection.png"></button>
-				<button id="stop_detection" class="btn" style="padding: 0px;width: 60px;" data-toggle="tooltip" title="Stop object detection!"><img style="height: 40px"src="image/detection.png"></button>
-				
+			<h1 class="sub-1">SURVEILLANCE CAMERA</h1>
+			<div class="row">
+				<div class="col-sm-6">
+					<h4>Entry gate</h4>
+					<iframe width="100%" height="240" style="border: 2px solid green; border-radius: 5px" src="http://172.16.10.170:81/stream"></iframe>
+				</div>
+				<div class="col-sm-6">
+					<h4>Exit gate</h4>
+					<iframe width="100%" height="240" style="border: 2px solid red; border-radius: 5px" src="http://172.16.10.171:81/stream"></iframe>
+				</div>
 			</div>
 
 		</div> <!-- end of col-6 -->
@@ -149,26 +129,84 @@
 	</div> <!--End of row section -->
 </div> <!--End of wrap section -->
 <script type="text/javascript">
-	document.getElementById('data_detail').onclick = function () {
-	    window.location = 'data.php';
-}
-</script>
+	const TOTAL_SLOTS = 6;
 
-<script>
-var myVar = setInterval(myTimer, 1000);
+	const slotContainer = document.getElementById("slot-container");
+	for (let i = 1; i <= 6; i++) {
+		const slotDiv = document.createElement("div");
+		slotDiv.className = "slot";
+		slotDiv.id = "slot-" + i;
+		slotDiv.style.border = "1px solid #ccc";
+		slotDiv.style.borderRadius = "8px";
+		slotDiv.style.padding = "10px";
+		slotDiv.style.background = "#ccffcc"; // màu mặc định: trống
 
-function myTimer() {
-  var d = new Date();
-  var t = d.toLocaleTimeString();
-  document.getElementById("system_timer").innerHTML = t;
-}
-</script>
-<script type="text/javascript">
-    setInterval("my_function();",5000); 
-    function my_function(){
-      $('#system_refresh').load(location.href + ' #system_refresh');
-    }
- </script>
+		slotDiv.innerHTML = `
+			<h4>Slot ${i}</h4>
+			<p>Status: <strong>Loading...</strong></p>
+		`;
+		slotContainer.appendChild(slotDiv);
+	}
+
+	async function fetchDataFromWemos() {
+		try {
+			const response = await fetch('http://192.168.1.123/status');
+			const data = await response.json();
+			updateUI(data);
+		} catch (error) {
+			console.error("Lỗi kết nối Wemos:", error);
+		}
+	}
+
+	function updateUI(data) {
+		let availableCount = 0;
+
+		for (let i = 1; i <= TOTAL_SLOTS; i++) {
+			const slotData = data.slots.find(s => s.id === i);
+			const slotDiv = document.getElementById("slot-" + i);
+
+			if (!slotDiv) continue;
+
+			if (slotData && slotData.status === "occupied") {
+				slotDiv.style.background = "#ffcccc";
+				slotDiv.innerHTML = `
+					<h4>Slot ${i}</h4>
+					<p>Trạng thái: <strong>Đã có xe</strong></p>
+					<p>RFID: ${slotData.rfid}</p>
+					<p>Giờ vào: ${slotData.timeIn}</p>
+				`;
+			} else {
+				availableCount++;
+				slotDiv.style.background = "#ccffcc";
+				slotDiv.innerHTML = `
+					<h4>Bãi ${i}</h4>
+					<p>Trạng thái: <strong>Trống</strong></p>
+				`;
+			}
+		}
+
+		document.getElementById("available-count").textContent = availableCount;
+	}
+
+	fetchDataFromWemos();
+	setInterval(fetchDataFromWemos, 5000);
+	</script>
+
+	<!-- real time -->
+	<script>
+		var myVar = setInterval(myTimer, 1000);
+		function myTimer() {
+			var d = new Date();
+			document.getElementById("system_timer").innerHTML = d.toLocaleTimeString();
+		}
+		</script>
+
+		<script type="text/javascript">
+		setInterval("my_function();",5000); 
+		function my_function(){
+			$('#system_refresh').load(location.href + ' #system_refresh');
+		}
+	</script>
 
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
