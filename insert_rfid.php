@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "sensor_db";
+$dbname = "rfid_db";
 
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) {
