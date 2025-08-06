@@ -21,7 +21,7 @@
 			<h1 class="sub-1">GATE CONTROL PANEL</h1>
 			<div class="column cyan">
 				<h2>GATE CONTROL</h2>
-				<button id="open_gate" class="btn btn-success">Open Gate</button>
+				<button id="open_gate" class="btn btn-info">Open Gate</button>
 				<button id="close_gate" class="btn btn-danger">Close Gate</button>
 			</div>			
 
@@ -216,4 +216,3 @@
 <?php require_once("includes/footer.php"); ?> 
 
 			
-

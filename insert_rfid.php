@@ -9,10 +9,10 @@ if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
 
-$temp = $_GET['temp'];
-$hum = $_GET['hum'];
+$RFID = $_GET['RFID'];
+$ArriveTime = $_GET['ArriveTime'];
 
-$sql = "INSERT INTO dht_data (temperature, humidity) VALUES ('$temp', '$hum')";
+$sql = "INSERT INTO rfid_db (RFID, ArriveTime) VALUES ('$RFID', '$ArriveTime')";
 
 if ($conn->query($sql) === TRUE) {
   echo "OK";
