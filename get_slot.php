@@ -13,15 +13,11 @@ $sql = "SELECT CONCAT(Area, SlotCode) AS SlotName FROM parkingslot";
 $result = $conn->query($sql);
 
 $slots = array();
-$i = 1;
 while ($row = $result->fetch_assoc()) {
-    $slots[] = array(
-        "id" => $i,
-        "slot_name" => $row["SlotName"]
-    );
-    $i++;
+    $slots[] = $row["SlotName"];
 }
 
+header('Content-Type: application/json');
 echo json_encode($slots);
 
 $conn->close();
