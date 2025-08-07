@@ -10,7 +10,7 @@
         require_once("includes/header.php");
     }
     else {
-         header('Location: /robotic/login.php');
+         header('Location: /smartparking/login.php');
     }
 ?>
 
@@ -23,9 +23,9 @@
             </div>
 
             <div class="col-sm-7">
-                <h4>A Mobile Robotic System for Surveillance of Environments</h4>
+                <h4>A Mobile smartparking System for Surveillance of Environments</h4>
 
-                <p style="text-align: justify;">The development of intelligent surveillance systems is an active research area. In this context, mobile and multi-functional robots are generally adopted as means to reduce the environment structuring and the number of devices needed to cover a given area. Nevertheless, the number of different sensors mounted on the robot, and the number of complex tasks related to exploration, monitoring, and surveillance make the design of the overall system extremely challenging. In this word, we present our mobile robot for surveillance of indoor environments. We propose a system able to handle autonomously general-purpose tasks and complex surveillance issues simultaneously. It is shown that the proposed robotic surveillance scheme successfully addresses a number of basic problems related to environment mapping, localization and autonomous navigation, as well as surveillance tasks, like scene processing to detect abandoned or removed objects and people detection. Real world applications of the proposed system include surveillance of wide areas (e.g. airports and museums) and buildings, and monitoring of safety equipment.</p>
+                <p style="text-align: justify;">The development of intelligent surveillance systems is an active research area. In this context, mobile and multi-functional robots are generally adopted as means to reduce the environment structuring and the number of devices needed to cover a given area. Nevertheless, the number of different sensors mounted on the robot, and the number of complex tasks related to exploration, monitoring, and surveillance make the design of the overall system extremely challenging. In this word, we present our mobile robot for surveillance of indoor environments. We propose a system able to handle autonomously general-purpose tasks and complex surveillance issues simultaneously. It is shown that the proposed smartparking surveillance scheme successfully addresses a number of basic problems related to environment mapping, localization and autonomous navigation, as well as surveillance tasks, like scene processing to detect abandoned or removed objects and people detection. Real world applications of the proposed system include surveillance of wide areas (e.g. airports and museums) and buildings, and monitoring of safety equipment.</p>
     
             </div>
         </div>

@@ -271,7 +271,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "GET",
                 url: "http://172.16.10.21/admin/start_stream_video.php",
-                //url: "http://localhost/robotic/admin/start_stream_video.php",
+                //url: "http://localhost/smartparking/admin/start_stream_video.php",
                 success: function(result) {
                     alert('Start stream video successfully!');
                     // document.getElementById("video_feed").src="http://192.168.1.112:8000/stream.mjpg";
@@ -297,7 +297,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "GET",
                 url: "http://172.16.10.21/admin/stop_stream_video.php",
-                //url: "http://localhost/robotic/admin/start_stream_video.php",
+                //url: "http://localhost/smartparking/admin/start_stream_video.php",
                 success: function(result) {
                     alert('Stop stream video successfully!');
                     window.location.reload();
@@ -317,16 +317,16 @@ $(document).ready(function() {
         e.preventDefault();
         if (button_start_detection.disabled == true)
         {
-            url_take_photo_link = "http://localhost/robotic/admin/take_photo_detection.php";
+            url_take_photo_link = "http://localhost/smartparking/admin/take_photo_detection.php";
         }
         else{
-            url_take_photo_link = "http://localhost/robotic/admin/take_photo_normal.php";
+            url_take_photo_link = "http://localhost/smartparking/admin/take_photo_normal.php";
         }
         var r = confirm('Start take photo!');
         if (r == true) {
             $.ajax({
                 type: "GET",
-                // url: "http://localhost/robotic/admin/take_photo.php",
+                // url: "http://localhost/smartparking/admin/take_photo.php",
                 url: url_take_photo_link,
                 success: function(result) {
                     alert('Take photo successfully!');
@@ -344,10 +344,10 @@ $(document).ready(function() {
         e.preventDefault();
         if (button_start_detection.disabled == true)
         {
-            url_video_record_link = "http://localhost/robotic/admin/video_record_detection.php";
+            url_video_record_link = "http://localhost/smartparking/admin/video_record_detection.php";
         }
         else{
-            url_video_record_link = "http://localhost/robotic/admin/video_record.php";
+            url_video_record_link = "http://localhost/smartparking/admin/video_record.php";
         }
         var r = confirm('Start video record!');
         if (r == true) {
@@ -407,8 +407,8 @@ $(document).ready(function() {
         if (r == true) {
             $.ajax({
                 type: "GET",
-                url: "http://localhost/robotic/admin/start_detection.php",
-                //url: "http://localhost/robotic/admin/start_stream_video.php",
+                url: "http://localhost/smartparking/admin/start_detection.php",
+                //url: "http://localhost/smartparking/admin/start_stream_video.php",
                 success: function(result) {
                     // alert('Human detection successfully!');
                     // document.getElementById("video_feed").src = "http://localhost:8000/video_feed";
@@ -434,7 +434,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "GET",
                 url: "http://localhost:8000/stop_detector",
-                //url: "http://localhost/robotic/admin/start_stream_video.php",
+                //url: "http://localhost/smartparking/admin/start_stream_video.php",
                 success: function(result) {
                     alert('Stop Human detection successfully!');
                     
@@ -461,7 +461,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "GET",
                 url: "http://172.16.10.21/admin/shutdown_pi.php",
-                //url: "http://localhost/robotic/admin/start_stream_video.php",
+                //url: "http://localhost/smartparking/admin/start_stream_video.php",
                 success: function(result) {
                     alert('shutdown_pi successfully!');
                     //window.location.reload();
@@ -482,7 +482,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "GET",
                 url: "http://192.168.1.112/admin/restart_pi.php",
-                //url: "http://localhost/robotic/admin/start_stream_video.php",
+                //url: "http://localhost/smartparking/admin/start_stream_video.php",
                 success: function(result) {
                     alert('restart_pi successfully!');
                     window.location.reload();
