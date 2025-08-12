@@ -48,7 +48,7 @@
             <div id="nav">                
                 <ul>
                     <li <?php if($current == 'home') {echo 'class="current"';} ?>><a href="/smartparking/index.php" style="font-family: sans-serif;font-weight: bold;">Home</a></li>
-                    <li <?php if($current == 'control') {echo 'class="current"';} ?>><a href="/smartparking/control.php" style="font-family: sans-serif;font-weight: bold;" id="activeControl"> Robot Control</a></li>
+                    <li <?php if($current == 'control') {echo 'class="current"';} ?>><a href="/smartparking/control.php" style="font-family: sans-serif;font-weight: bold;" id="activeControl"> Slot Control</a></li>
                     <li <?php if($current == 'data') {echo 'class="current"';} ?>><a href="#" style="font-family: sans-serif;font-weight: bold;">Data</a>
                         <ul class="sub-menu">
                             <li><a href="/smartparking/data.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Data</a></li>

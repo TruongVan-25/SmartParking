@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
-$user = "root";       // đổi theo XAMPP
-$pass = "";           // đổi theo XAMPP
+$user = "smartparking";       // đổi theo XAMPP
+$pass = "cyber@2025";           // đổi theo XAMPP
 $dbname = "smart_parking";
 
 $conn = new mysqli($host, $user, $pass, $dbname);
