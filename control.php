@@ -66,17 +66,18 @@
 							$total_slots = 0;
 						}
 
-	                    // get MQ2 data
-	                    $sql = 'SELECT * FROM mq2sensor ORDER BY `date` DESC';                    
-	                    $result = mysqli_query($conn, $sql);
-	                    $row = mysqli_fetch_array($result);
-	                    $mq2 = $row['mq2'];
+	                    // Lấy tổng số lượng slot đã có xe đỗ
+						$sql = "SELECT COUNT(*) AS occupied FROM parkinghistory WHERE TimeOut IS NULL";
+						$result = mysqli_query($conn, $sql);
 
-	                    // get current distance 
-	                    $sql = 'SELECT * FROM distance ORDER BY `date` DESC';                    
-	                    $result = mysqli_query($conn, $sql);
-	                    $row = mysqli_fetch_array($result);
-	                    $distance = $row['distance'];
+						if ($result && mysqli_num_rows($result) > 0) {
+							$row = mysqli_fetch_assoc($result);
+							$occupied_slots = $row['occupied'];
+						} else {
+							$occupied_slots = 0;
+						}
+
+						$available_slots = $total_slots - $occupied_slots;
 	                  
 	                            
 	                ?>
@@ -85,13 +86,10 @@
 					
 		                <ul style="list-style-type:disc;">
 						  	<li>Total slots: <?php echo $total_slots;?>	</li>
-						  	<!-- <li>Available: <?php echo $humidity;?></li>
-						  	<li>Occupied: <?php echo $mq2;?></li>
-						  	<li style="background-color: <?php echo $background_color_distance;?>; "> Distance to obstacle: <?php echo $distance;?> cm</li> -->
+						  	<li>Available: <?php echo $available_slots;?></li>
+						  	<li>Occupied: <?php echo $occupied_slots;?></li>
 						</ul>  
 	            	</div>
-
-					<!-- <p id="systeminfo" style=" width: 95%; text-align: center; color: white; background-color: <?php echo $background_color;?>; ">Environmetal Status: <?php echo $environmental_status;?></p> -->
 					
 				</div> <!-- end of system refresh -->
 				<button id="data_detail" class="btn btn-info" style="font-size: 15px;">Details</button>
