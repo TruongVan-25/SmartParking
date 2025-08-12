@@ -15,7 +15,7 @@
 
 ?>
 
-<div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px;">
+<div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px; display: flex; justify-content: center;">
 	<div class="row">
 		<div class="col-sm-3">				
 			<h1 class="sub-1">GATE CONTROL PANEL</h1>
@@ -25,11 +25,6 @@
 				<button id="close_gate" class="btn btn-danger">Close Gate</button>
 			</div>			
 
-			<h2 class="sub-1">TOTAL AVAILABLE SLOTS: <span id="available-count">0</span></h2>
-
-			<div class="parking-area" style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff;">
-				<div id="slot-container" class="grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
-			</div>
 		</div> <!-- end of col-3 -->
 
 		<div class="col-sm-6" style="text-align: center; padding: 0px;">			
@@ -48,7 +43,7 @@
 		</div> <!-- end of col-6 -->
 		<div class="col-sm-3">
 			<!-- chỗ này để số lượng chỗ đã đỗ, còn trống, trên tổng số -->
-			<h1 class="sub-1">SYSTEM INFORMATION</h1>		
+			<h1 class="sub-1">OVERALL STATUS</h1>		
 			<div class="center">
 				<p style="color: orange; font-weight: bold; text-align: center;">System Time: <span id="system_timer"></span></p>
 				<div id="system_refresh"> 	
@@ -100,71 +95,79 @@
 			</div>		
 			
 			
-		</div> <!-- end of col-3 -->				
+		</div> <!-- end of col-3 -->	
+		<div class="row" style="margin-top: 20px;">
+			<div class="col-sm-12">
+				<h2 class="sub-1" style="text-align: center;">
+					TOTAL AVAILABLE SLOTS: <span id="available-count">0</span>
+				</h2>
+			</div>
+			<div class="col-sm-12" style="display: flex; justify-content: center;">
+				<div class="parking-area" 
+					style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff; display: flex; justify-content: center; width: 90%; box-sizing: border-box;">
+					<div id="slot-container" 
+						style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; justify-items: center; width: 100%; max-width: 900px;">
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>			
 	</div> <!--End of row section -->
 </div> <!--End of wrap section -->
 <script type="text/javascript">
-	const TOTAL_SLOTS = 6;
-
 	const slotContainer = document.getElementById("slot-container");
-	for (let i = 1; i <= 6; i++) {
-		const slotDiv = document.createElement("div");
-		slotDiv.className = "slot";
-		slotDiv.id = "slot-" + i;
-		slotDiv.style.border = "1px solid #ccc";
-		slotDiv.style.borderRadius = "8px";
-		slotDiv.style.padding = "10px";
-		slotDiv.style.background = "#ccffcc"; // màu mặc định: trống
-
-		slotDiv.innerHTML = `
-			<h4>Slot ${i}</h4>
-			<p>Status: <strong>Loading...</strong></p>
-		`;
-		slotContainer.appendChild(slotDiv);
-	}
-
-	async function fetchDataFromWemos() {
+	async function fetchSlotsFromDB() {
 		try {
-			const response = await fetch('http://192.168.1.123/status');
-			const data = await response.json();
-			updateUI(data);
+			// Lấy danh sách tất cả slot
+			const slotsRes = await fetch('services/get_slot.php');
+			const slots = await slotsRes.json(); // ["A1", "A2", ...]
+
+			// Lấy danh sách slot bị occupied
+			const occupiedRes = await fetch('services/get_occupied.php');
+			const occupiedSlots = await occupiedRes.json(); // ["A2", "B3", ...]
+
+			slotContainer.innerHTML = "";
+			let availableCount = 0;
+
+			slots.forEach((slotName, index) => {
+				const slotDiv = document.createElement("div");
+				slotDiv.className = "slot";
+				slotDiv.id = `slot-${index + 1}`;
+				slotDiv.style.border = "1px solid #ccc";
+				slotDiv.style.borderRadius = "8px";
+				slotDiv.style.padding = "10px";
+
+				if (occupiedSlots.includes(slotName)) {
+					// Slot bị chiếm
+					slotDiv.style.background = "#ffcccc"; // đỏ nhạt
+					slotDiv.innerHTML = `
+						<h4>${slotName}</h4>
+						<p>Status: <strong style="color:red;">Occupied</strong></p>
+					`;
+				} else {
+					// Slot trống
+					slotDiv.style.background = "#ccffcc"; // xanh nhạt
+					slotDiv.innerHTML = `
+						<h4>${slotName}</h4>
+						<p>Status: <strong style="color:green;">Available</strong></p>
+					`;
+					availableCount++;
+				}
+
+				slotContainer.appendChild(slotDiv);
+			});
+
+			// Hiển thị số slot trống
+			document.getElementById("available-count").textContent = availableCount;
+
 		} catch (error) {
-			console.error("Lỗi kết nối Wemos:", error);
+			console.error("Lỗi lấy slot từ DB:", error);
 		}
 	}
 
-	function updateUI(data) {
-		let availableCount = 0;
+// Gọi hàm khi load trang
+	fetchSlotsFromDB();
 
-		for (let i = 1; i <= TOTAL_SLOTS; i++) {
-			const slotData = data.slots.find(s => s.id === i);
-			const slotDiv = document.getElementById("slot-" + i);
-
-			if (!slotDiv) continue;
-
-			if (slotData && slotData.status === "occupied") {
-				slotDiv.style.background = "#ffcccc";
-				slotDiv.innerHTML = `
-					<h4>Slot ${i}</h4>
-					<p>Trạng thái: <strong>Đã có xe</strong></p>
-					<p>RFID: ${slotData.rfid}</p>
-					<p>Giờ vào: ${slotData.timeIn}</p>
-				`;
-			} else {
-				availableCount++;
-				slotDiv.style.background = "#ccffcc";
-				slotDiv.innerHTML = `
-					<h4>Bãi ${i}</h4>
-					<p>Trạng thái: <strong>Trống</strong></p>
-				`;
-			}
-		}
-
-		document.getElementById("available-count").textContent = availableCount;
-	}
-
-	fetchDataFromWemos();
-	setInterval(fetchDataFromWemos, 5000);
 	</script>
 
 	<!-- real time -->
