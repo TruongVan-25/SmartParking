@@ -47,6 +47,7 @@
 
 		</div> <!-- end of col-6 -->
 		<div class="col-sm-3">
+			<!-- chỗ này để số lượng chỗ đã đỗ, còn trống, trên tổng số -->
 			<h1 class="sub-1">SYSTEM INFORMATION</h1>		
 			<div class="center">
 				<p style="color: orange; font-weight: bold; text-align: center;">System Time: <span id="system_timer"></span></p>
@@ -54,11 +55,16 @@
 					<?php  
 	                    
 	                    include("php/connectSQL.php");                    
-	                    $sql = 'SELECT * FROM monitor ORDER BY `date` DESC';                    
-	                    $result = mysqli_query($conn, $sql);
-	                    $row = mysqli_fetch_array($result);
-	                    $temperature = $row['temperature'];
-	                    $humidity = $row['humidity'];
+	                    // Lấy tổng số lượng slot trong bảng parkingslot
+						$sql = "SELECT COUNT(*) AS total_slots FROM parkingslot";
+						$result = mysqli_query($conn, $sql);
+
+						if ($result && mysqli_num_rows($result) > 0) {
+							$row = mysqli_fetch_assoc($result);
+							$total_slots = $row['total_slots'];
+						} else {
+							$total_slots = 0;
+						}
 
 	                    // get MQ2 data
 	                    $sql = 'SELECT * FROM mq2sensor ORDER BY `date` DESC';                    
@@ -72,49 +78,20 @@
 	                    $row = mysqli_fetch_array($result);
 	                    $distance = $row['distance'];
 	                  
-	                    if ($temperature < 35) {
-							// echo "Environmetal Status: SAFE";
-							$background_color = "Green";
-							$environmental_status = "SAFE";
-						}
-						elseif($temperature >= 35 and $temperature < 45){
-							// echo "Environmetal Status: WARNING";
-							$background_color = "orange";
-							$environmental_status = "WARNING";
-						}
-						else{
-							// echo "Environmetal Status: WARNING";
-							$background_color = "red";
-							$environmental_status = "DANGER";
-						}
-						if ($distance < 20) {
-							// echo "Environmetal Status: SAFE";
-							$background_color_distance = "red";
-							
-						}
-						elseif($distance >= 20 and $distance < 100){
-							// echo "Environmetal Status: WARNING";
-							$background_color_distance = "orange";
-							
-						}
-						else{
-							// echo "Environmetal Status: WARNING";
-							$background_color_distance = "green";
-							
-						}	                   
+	                            
 	                ?>
 	                <!-- print environmental data -->
 	                <div style="color: white; text-align: left;">   				
 					
 		                <ul style="list-style-type:disc;">
-						  	<li>Temperature: <?php echo $temperature;?>	</li>
-						  	<li>Humudity: <?php echo $humidity;?></li>
-						  	<li>MQ2 Level: <?php echo $mq2;?></li>
-						  	<li style="background-color: <?php echo $background_color_distance;?>; "> Distance to obstacle: <?php echo $distance;?> cm</li>
+						  	<li>Total slots: <?php echo $total_slots;?>	</li>
+						  	<!-- <li>Available: <?php echo $humidity;?></li>
+						  	<li>Occupied: <?php echo $mq2;?></li>
+						  	<li style="background-color: <?php echo $background_color_distance;?>; "> Distance to obstacle: <?php echo $distance;?> cm</li> -->
 						</ul>  
 	            	</div>
 
-					<p id="systeminfo" style=" width: 95%; text-align: center; color: white; background-color: <?php echo $background_color;?>; ">Environmetal Status: <?php echo $environmental_status;?></p>
+					<!-- <p id="systeminfo" style=" width: 95%; text-align: center; color: white; background-color: <?php echo $background_color;?>; ">Environmetal Status: <?php echo $environmental_status;?></p> -->
 					
 				</div> <!-- end of system refresh -->
 				<button id="data_detail" class="btn btn-info" style="font-size: 15px;">Details</button>
