@@ -1,75 +1,116 @@
 <?php
-require("phpMQTT.php"); // thư viện phpMQTT (phpMQTT.php đặt cùng folder)
+require("phpMQTT.php"); // thư viện phpMQTT
 
-$server = "172.16.2.4";     // MQTT Broker IP
-$port = 1883;
-$username = "smartparking";             // nếu broker có auth thì điền
-$password = "cyber@2025";
-$client_id = "php_subscriber_01";
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+set_time_limit(0); // chạy liên tục
+ob_implicit_flush(true);
+
+// Hàm log ra web
+function logMsg($msg){
+    echo "[".date("Y-m-d H:i:s")."] " . htmlspecialchars($msg) . "<br>\n";
+    ob_flush();
+    flush();
+}
 
 // Kết nối DB
-$db = new mysqli("localhost", "smartparking", "cyber@2025", "smart_parking");
-if ($db->connect_error) {
-    die("DB connect failed: " . $db->connect_error);
+try {
+    $db = new mysqli("localhost", "smartparking", "cyber@2025", "smart_parking");
+    if ($db->connect_error) throw new Exception("DB connect failed: ".$db->connect_error);
+    logMsg("✅ DB connected");
+} catch(Exception $e){
+    logMsg("❌ ".$e->getMessage());
+    exit;
 }
 
-$mqtt = new Bluerhinos\phpMQTT($server, $port, $client_id);
+// Kết nối MQTT
+$server = "172.16.2.4";     
+$port = 1883;
+$username = "";             
+$password = "";
+$client_id = "php_control_".uniqid();
 
-if(!$mqtt->connect(true, NULL, $username, $password)) {
-    exit(1);
+try {
+    $mqtt = new Bluerhinos\phpMQTT($server, $port, $client_id);
+    if(!$mqtt->connect(true, NULL, $username, $password)) throw new Exception("Cannot connect to MQTT Broker");
+    logMsg("✅ MQTT connected to $server:$port");
+} catch(Exception $e){
+    logMsg("❌ ".$e->getMessage());
+    exit;
 }
 
+// Đăng ký topic
 $topics['parking/#'] = array("qos"=>0, "function"=>"procMsg");
 $mqtt->subscribe($topics, 0);
+logMsg("➡ Subscribed to topics: parking/#");
 
-while($mqtt->proc()){}
+// Vòng lặp nhận tin
+while($mqtt->proc()){
+    // giữ script chạy liên tục
+}
 
 $mqtt->close();
+logMsg("MQTT connection closed");
 
+
+// Hàm xử lý tin nhắn
 function procMsg($topic, $msg){
     global $db;
+    logMsg("📩 Received [$topic]: $msg");
 
-    // 1. Trạng thái từng slot
-    if (preg_match('/^parking\/slot\/(.+)\/status$/', $topic, $m)) {
-        $slotCode = $db->real_escape_string($m[1]); // A1, B1,...
-        $status = ($msg == "O") ? 1 : 0;
+    try {
+        // 1. Trạng thái từng slot
+        if (preg_match('/^parking\/slot\/(.+)\/status$/', $topic, $m)) {
+            $slotCode = $db->real_escape_string($m[1]); 
+            $status = ($msg == "O") ? 1 : 0;
 
-        // Cập nhật bảng parkingslot
-        $db->query("UPDATE parkingslot 
-                    SET Status=$status 
-                    WHERE SlotCode='$slotCode'");
-    }
-
-    // 2. Log cổng (OPEN/CLOSE)
-    else if ($topic == "parking/gate/status") {
-        // msg ví dụ: ENTRY_OPEN
-        if (strpos($msg, "ENTRY") === 0) $gateType = "ENTRY";
-        else if (strpos($msg, "EXIT") === 0) $gateType = "EXIT";
-        else $gateType = "UNKNOWN";
-
-        $action = (strpos($msg, "OPEN") !== false) ? "Open" : "Close";
-
-        $db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
-                    VALUES('$gateType', '$action', NOW(), 'SYSTEM')");
-    }
-
-    // 3. Log JSON từ Wemos
-    else if ($topic == "parking/log") {
-        $data = json_decode($msg, true);
-        if ($data && isset($data['gate']) && isset($data['action'])) {
-            $gate = $db->real_escape_string($data['gate']);
-            $action = $db->real_escape_string($data['action']);
-            $by = $db->real_escape_string($data['by']);
-            $time = date("Y-m-d H:i:s");
-
-            $db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
-                        VALUES('$gate', '$action', '$time', '$by')");
+            if(!$db->query("UPDATE parkingslot SET Status=$status WHERE SlotCode='$slotCode'")) {
+                throw new Exception("DB update parkingslot failed: ".$db->error);
+            }
+            logMsg("✅ Slot $slotCode updated to status $status");
         }
-    }
 
-    // 4. Nếu muốn lưu số slot trống
-    else if ($topic == "parking/slots/count") {
-        $free = intval($msg);
-        // Có thể log riêng hoặc bỏ qua, vì parkingslot đã có trạng thái chi tiết
+        // 2. Log cổng
+        else if ($topic == "parking/gate/status") {
+            if (strpos($msg, "ENTRY") === 0) $gateType = "ENTRY";
+            else if (strpos($msg, "EXIT") === 0) $gateType = "EXIT";
+            else $gateType = "UNKNOWN";
+
+            $action = (strpos($msg, "OPEN") !== false) ? "Open" : "Close";
+
+            if(!$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
+                            VALUES('$gateType', '$action', NOW(), 'SYSTEM')")) {
+                throw new Exception("DB insert gatelog failed: ".$db->error);
+            }
+            logMsg("✅ Gate log: $gateType - $action");
+        }
+
+        // 3. Log JSON từ Wemos
+        else if ($topic == "parking/log") {
+            $data = json_decode($msg, true);
+            if ($data && isset($data['gate'], $data['action'], $data['by'])) {
+                $gate = $db->real_escape_string($data['gate']);
+                $action = $db->real_escape_string($data['action']);
+                $by = $db->real_escape_string($data['by']);
+                $time = date("Y-m-d H:i:s");
+
+                if(!$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
+                                VALUES('$gate', '$action', '$time', '$by')")) {
+                    throw new Exception("DB insert gatelog failed: ".$db->error);
+                }
+                logMsg("✅ JSON Gate log inserted: $gate - $action by $by");
+            } else {
+                logMsg("⚠ Invalid JSON: $msg");
+            }
+        }
+
+        // 4. Slot count
+        else if ($topic == "parking/slots/count") {
+            $free = intval($msg);
+            logMsg("ℹ Free slots count: $free");
+        }
+
+    } catch(Exception $e){
+        logMsg("❌ Error: ".$e->getMessage());
     }
-?>
+}
