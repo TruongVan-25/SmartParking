@@ -200,12 +200,20 @@
 	</script>
 
 <script>
-document.getElementById("open_gate").addEventListener("click", function() {
+document.getElementById("open_gate_entrance").addEventListener("click", function() {
     sendCommand("OPEN_ENTRY");
 });
 
-document.getElementById("close_gate").addEventListener("click", function() {
+document.getElementById("close_gate_entrance").addEventListener("click", function() {
     sendCommand("CLOSE_ENTRY");
+});
+
+document.getElementById("open_gate_exit").addEventListener("click", function() {
+    sendCommand("OPEN_EXIT");
+});
+
+document.getElementById("close_gate_exit").addEventListener("click", function() {
+    sendCommand("CLOSE_EXIT");
 });
 
 function sendCommand(action) {
