@@ -18,23 +18,27 @@
 <div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px; display: flex; justify-content: center;">
 	<div class="row">
 		<div class="col-sm-3">				
-            <h1 class="sub-1">CONTROL PANEL</h1>
 
-            <!-- ENTRY GATE CONTROL -->
-            <div class="column cyan mb-3 p-2">
-                <h2>ENTRY</h2>
-                <button id="open_entry_gate" class="btn btn-info d-block w-100 mb-2">Open</button>
-                <button id="close_entry_gate" class="btn btn-danger d-block w-100">Close</button>
-            </div>
+			<h1 class="sub-1">GATE CONTROL PANEL</h1>
+			<div class="column" style="background: #f0f0f0; padding: 15px; border-radius: 10px;">
+    		<h2>GATE CONTROL</h2>
 
-            <!-- EXIT GATE CONTROL -->
-            <div class="column bg-warning p-2">
-                <h2>EXIT</h2>
-                <button id="open_exit_gate" class="btn btn-info d-block w-100 mb-2">Open</button>
-                <button id="close_exit_gate" class="btn btn-danger d-block w-100">Close</button>
-            </div>
+			<!-- Entrance Gate -->
+			<div style="background: #d9f7d9; padding: 10px; margin-bottom: 15px; border-radius: 8px;">
+				<h3 style="color: green;">Entrance</h3>
+				<button id="open_gate_entrance" class="btn btn-success">Open Gate</button>
+				<button id="close_gate_entrance" class="btn btn-danger">Close Gate</button>
+			</div>
 
-        </div> <!-- end of col-3 -->
+			<!-- Exit Gate -->
+			<div style="background: #f7d9d9; padding: 10px; border-radius: 8px;">
+				<h3 style="color: red;">Exit</h3>
+				<button id="open_gate_exit" class="btn btn-success">Open Gate</button>
+				<button id="close_gate_exit" class="btn btn-danger">Close Gate</button>
+			</div>
+		</div>
+	</div> <!-- end of col-3 -->
+
 
         
 		<div class="col-sm-6" style="text-align: center; padding: 0px;">			
@@ -197,13 +201,24 @@
 	</script>
 
 <script>
-document.getElementById("open_gate").addEventListener("click", function() {
+
+document.getElementById("open_gate_entrance").addEventListener("click", function() {
     sendCommand("OPEN_ENTRY");
 });
 
-document.getElementById("close_gate").addEventListener("click", function() {
+document.getElementById("close_gate_entrance").addEventListener("click", function() {
     sendCommand("CLOSE_ENTRY");
 });
+
+document.getElementById("open_gate_exit").addEventListener("click", function() {
+    sendCommand("OPEN_EXIT");
+});
+
+document.getElementById("close_gate_exit").addEventListener("click", function() {
+    sendCommand("CLOSE_EXIT");
+});
+
+
 
 function sendCommand(action) {
     fetch("mqtt_control.php", {
