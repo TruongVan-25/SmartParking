@@ -177,14 +177,40 @@
 			var d = new Date();
 			document.getElementById("system_timer").innerHTML = d.toLocaleTimeString();
 		}
-		</script>
+	</script>
 
-		<script type="text/javascript">
+	<script type="text/javascript">
 		setInterval("my_function();",5000); 
 		function my_function(){
 			$('#system_refresh').load(location.href + ' #system_refresh');
 		}
 	</script>
+
+<script>
+document.getElementById("open_gate").addEventListener("click", function() {
+    sendCommand("OPEN_ENTRY");
+});
+
+document.getElementById("close_gate").addEventListener("click", function() {
+    sendCommand("CLOSE_ENTRY");
+});
+
+function sendCommand(action) {
+    fetch("mqtt_control.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "action=" + action
+    })
+    .then(response => response.text())
+    .then(result => {
+        alert("Server response: " + result);
+        console.log(result);
+    })
+    .catch(error => console.error("Error:", error));
+}
+</script>
 
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
