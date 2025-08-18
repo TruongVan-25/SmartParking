@@ -19,11 +19,24 @@
 	<div class="row">
 		<div class="col-sm-3">				
 			<h1 class="sub-1">GATE CONTROL PANEL</h1>
-			<div class="column cyan">
-				<h2>GATE CONTROL</h2>
-				<button id="open_gate" class="btn btn-info">Open Gate</button>
-				<button id="close_gate" class="btn btn-danger">Close Gate</button>
-			</div>			
+			<div class="column" style="background: #f0f0f0; padding: 15px; border-radius: 10px;">
+    <h2>GATE CONTROL</h2>
+
+    <!-- Entrance Gate -->
+    <div style="background: #d9f7d9; padding: 10px; margin-bottom: 15px; border-radius: 8px;">
+        <h3 style="color: green;">Entrance</h3>
+        <button id="open_gate_entrance" class="btn btn-success">Open Gate</button>
+        <button id="close_gate_entrance" class="btn btn-danger">Close Gate</button>
+    </div>
+
+    <!-- Exit Gate -->
+    <div style="background: #f7d9d9; padding: 10px; border-radius: 8px;">
+        <h3 style="color: red;">Exit</h3>
+        <button id="open_gate_exit" class="btn btn-success">Open Gate</button>
+        <button id="close_gate_exit" class="btn btn-danger">Close Gate</button>
+    </div>
+</div>
+			
 
 		</div> <!-- end of col-3 -->
 
