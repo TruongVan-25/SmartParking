@@ -18,15 +18,25 @@
 <div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px; display: flex; justify-content: center;">
 	<div class="row">
 		<div class="col-sm-3">				
-			<h1 class="sub-1">GATE CONTROL PANEL</h1>
-			<div class="column cyan">
-				<h2>GATE CONTROL</h2>
-				<button id="open_gate" class="btn btn-info">Open Gate</button>
-				<button id="close_gate" class="btn btn-danger">Close Gate</button>
-			</div>			
+            <h1 class="sub-1">CONTROL PANEL</h1>
 
-		</div> <!-- end of col-3 -->
+            <!-- ENTRY GATE CONTROL -->
+            <div class="column cyan mb-3 p-2">
+                <h2>ENTRY</h2>
+                <button id="open_entry_gate" class="btn btn-info d-block w-100 mb-2">Open</button>
+                <button id="close_entry_gate" class="btn btn-danger d-block w-100">Close</button>
+            </div>
 
+            <!-- EXIT GATE CONTROL -->
+            <div class="column bg-warning p-2">
+                <h2>EXIT</h2>
+                <button id="open_exit_gate" class="btn btn-info d-block w-100 mb-2">Open</button>
+                <button id="close_exit_gate" class="btn btn-danger d-block w-100">Close</button>
+            </div>
+
+        </div> <!-- end of col-3 -->
+
+        
 		<div class="col-sm-6" style="text-align: center; padding: 0px;">			
 			<h1 class="sub-1">SURVEILLANCE CAMERA</h1>
 			<div class="row">
