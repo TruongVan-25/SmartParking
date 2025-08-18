@@ -18,6 +18,7 @@
 <div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px; display: flex; justify-content: center;">
 	<div class="row">
 		<div class="col-sm-3">				
+
 			<h1 class="sub-1">GATE CONTROL PANEL</h1>
 			<div class="column" style="background: #f0f0f0; padding: 15px; border-radius: 10px;">
     		<h2>GATE CONTROL</h2>
@@ -38,6 +39,8 @@
 		</div>
 	</div> <!-- end of col-3 -->
 
+
+        
 		<div class="col-sm-6" style="text-align: center; padding: 0px;">			
 			<h1 class="sub-1">SURVEILLANCE CAMERA</h1>
 			<div class="row">
@@ -198,6 +201,7 @@
 	</script>
 
 <script>
+
 document.getElementById("open_gate_entrance").addEventListener("click", function() {
     sendCommand("OPEN_ENTRY");
 });
@@ -213,6 +217,8 @@ document.getElementById("open_gate_exit").addEventListener("click", function() {
 document.getElementById("close_gate_exit").addEventListener("click", function() {
     sendCommand("CLOSE_EXIT");
 });
+
+
 
 function sendCommand(action) {
     fetch("mqtt_control.php", {
