@@ -5,11 +5,11 @@
         require_once("includes/header.php");
     }
     else {
-         header('Location: /robotic/login.php');
+         header('Location: /smartparking/login.php');
     }
 ?>
 <div class="wrap" style="background: url(image/3.jpg);">
-    <p style="text-align: center; color: white; font-size: 25px; font-weight: bold">Robot Location Monitoring</p>
+    <p style="text-align: center; color: white; font-size: 25px; font-weight: bold">Parking Location Monitoring</p>
   
         
    

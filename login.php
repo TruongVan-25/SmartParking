@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>Mobile Robotic System - LoginPage</title>
+  <title>Mobile smartparking System - LoginPage</title>
 
     <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
     <!-- <link rel="stylesheet" type="text/css" href="css/bootstrap.css"> -->
@@ -17,7 +17,7 @@
   <div class="wrap" >
       <br><br><br><br><br><br>
       <div class="row">
-          <span href="#" class="buttonLogin" style="width: 300px">Mobile Robotic System</span>
+          <span href="#" class="buttonLogin" style="width: 300px">Mobile smartparking System</span>
       </div>
 
       <div class="row">

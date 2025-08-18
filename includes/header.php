@@ -33,31 +33,31 @@
     <div class="wrap" >
         <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
             <div class="col-3" style="text-align: center;">
-                <img class="logo" src="image/eiulogo.png">
+                <img class="logo" src="image/eiulogo1.png">
             </div>
             <div class="col-9" style="text-align: center;">
-                <div class="Title">A Mobile Robotic System for <br> Rescue and Surveillance of Indoor Environments</div>
+                <div class="Title">Smart Parking System for Smart Environments</div>
             </div>
         </div>  
         <div class="example2">
-            <h3> This work is handled by Admin team @IoT Lab at EIU - &copy 2018-2019 All Rights Reserved  </h3>
+            <h3> This work is handled by Admin team @CSC at EIU - &copy 2025-2026 All Rights Reserved  </h3>
         
         </div><!-- End row -->    
         
         <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
             <div id="nav">                
                 <ul>
-                    <li <?php if($current == 'home') {echo 'class="current"';} ?>><a href="/robotic/index.php" style="font-family: sans-serif;font-weight: bold;">Home</a></li>
-                    <li <?php if($current == 'control') {echo 'class="current"';} ?>><a href="/robotic/control.php" style="font-family: sans-serif;font-weight: bold;" id="activeControl"> Robot Control</a></li>
+                    <li <?php if($current == 'home') {echo 'class="current"';} ?>><a href="/smartparking/index.php" style="font-family: sans-serif;font-weight: bold;">Home</a></li>
+                    <li <?php if($current == 'control') {echo 'class="current"';} ?>><a href="/smartparking/control.php" style="font-family: sans-serif;font-weight: bold;" id="activeControl"> Slot Control</a></li>
                     <li <?php if($current == 'data') {echo 'class="current"';} ?>><a href="#" style="font-family: sans-serif;font-weight: bold;">Data</a>
                         <ul class="sub-menu">
-                            <li><a href="/robotic/data.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Data</a></li>
-                            <li><a href="/robotic/show_photo.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Image</a></li>
-                            <li><a href="/robotic/show_video.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Video</a></li>
+                            <li><a href="/smartparking/data.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Data</a></li>
+                            <li><a href="/smartparking/show_photo.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Image</a></li>
+                            <li><a href="/smartparking/show_video.php" style="font-family: 'Saira', sans-serif;font-weight: bold;">Video</a></li>
                         </ul>
                     </li>
-                    <li <?php if($current == 'location') {echo 'class="current"';} ?>><a href="/robotic/location.php" style="font-family: sans-serif;font-weight: bold;">Location</a></li>
-                    <li><a href="/robotic/index.php?logout='1'" style="font-family: sans-serif;font-weight: bold;">Logout</a></li>
+                    <li <?php if($current == 'location') {echo 'class="current"';} ?>><a href="/smartparking/location.php" style="font-family: sans-serif;font-weight: bold;">Location</a></li>
+                    <li><a href="/smartparking/index.php?logout='1'" style="font-family: sans-serif;font-weight: bold;">Logout</a></li>
                 </ul>            
             </div>
         </div>

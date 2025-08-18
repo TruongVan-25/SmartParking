@@ -10,7 +10,7 @@
 	//	include 'php/getdatatable.php';
 	}
 	else {
-		 header('Location: /robotic/login.php');
+		 header('Location: /smartparking/login.php');
 	}
 ?>
 
