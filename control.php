@@ -1,196 +1,671 @@
 <?php
+
+namespace Bluerhinos;
+
+/*
+ 	phpMQTT
+	A simple php class to connect/publish/subscribe to an MQTT broker
+
+*/
+
+/*
+	Licence
+
+	Copyright (c) 2010 Blue Rhinos Consulting | Andrew Milsted
+	andrew@bluerhinos.co.uk | http://www.bluerhinos.co.uk
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
 	
-	//include 'php/draw.php';
-	session_start();
-	
-	//include('php/conn2.php');
-	if($_SESSION['LoginInto'] == "TRUE") {
-		$current = 'control';
-		require_once("includes/header.php");
-	}
-	else {
-		 header('Location: /smartparking/login.php');
-	}
-	
+*/
 
-?>
+/* phpMQTT */
 
-<div class="wrap" style="background: url(image/3.jpg); padding-bottom: 10px; display: flex; justify-content: center;">
-	<div class="row">
-		<div class="col-sm-3">				
-			<h1 class="sub-1">GATE CONTROL PANEL</h1>
-			<div class="column cyan">
-				<h2>GATE CONTROL</h2>
-				<button id="open_gate" class="btn btn-info">Open Gate</button>
-				<button id="close_gate" class="btn btn-danger">Close Gate</button>
-			</div>			
+class phpMQTT
+{
+    protected $socket;            /* holds the socket	*/
+    protected $msgid = 1;            /* counter for message id */
+    public $keepalive = 10;        /* default keepalive timmer */
+    public $timesinceping;        /* host unix time, used to detect disconects */
+    public $topics = [];    /* used to store currently subscribed topics */
+    public $debug = false;        /* should output debug messages */
+    public $address;            /* broker address */
+    public $port;                /* broker port */
+    public $clientid;            /* client id sent to brocker */
+    public $will;                /* stores the will of the client */
+    protected $username;            /* stores username */
+    protected $password;            /* stores password */
 
-		</div> <!-- end of col-3 -->
+    public $cafile;
+    protected static $known_commands = [
+        1 => 'CONNECT',
+        2 => 'CONNACK',
+        3 => 'PUBLISH',
+        4 => 'PUBACK',
+        5 => 'PUBREC',
+        6 => 'PUBREL',
+        7 => 'PUBCOMP',
+        8 => 'SUBSCRIBE',
+        9 => 'SUBACK',
+        10 => 'UNSUBSCRIBE',
+        11 => 'UNSUBACK',
+        12 => 'PINGREQ',
+        13 => 'PINGRESP',
+        14 => 'DISCONNECT'
+    ];
 
-		<div class="col-sm-6" style="text-align: center; padding: 0px;">			
-			<h1 class="sub-1">SURVEILLANCE CAMERA</h1>
-			<div class="row">
-				<div class="col-sm-6">
-					<h4>Entry gate</h4>
-					<iframe width="100%" height="240" style="border: 2px solid green; border-radius: 5px" src="http://172.16.10.22/picam/cam_pic_new.php?pDelay=40000"></iframe>
-				</div>
-				<div class="col-sm-6">
-					<h4>Exit gate</h4>
-					<iframe width="100%" height="240" style="border: 2px solid red; border-radius: 5px" src="http://172.16.10.70:81/stream"></iframe>
-				</div>
-			</div>
+    /**
+     * phpMQTT constructor.
+     *
+     * @param $address
+     * @param $port
+     * @param $clientid
+     * @param null $cafile
+     */
+    public function __construct($address, $port, $clientid, $cafile = null)
+    {
+        $this->broker($address, $port, $clientid, $cafile);
+    }
 
-		</div> <!-- end of col-6 -->
-		<div class="col-sm-3">
-			<!-- chỗ này để số lượng chỗ đã đỗ, còn trống, trên tổng số -->
-			<h1 class="sub-1">OVERALL STATUS</h1>		
-			<div class="center">
-				<p style="color: orange; font-weight: bold; text-align: center;">System Time: <span id="system_timer"></span></p>
-				<div id="system_refresh"> 	
-					<?php  
-	                    
-	                    include("php/connectSQL.php");                    
-	                    // Lấy tổng số lượng slot trong bảng parkingslot
-						$sql = "SELECT COUNT(*) AS total_slots FROM parkingslot";
-						$result = mysqli_query($conn, $sql);
+    /**
+     * Sets the broker details
+     *
+     * @param $address
+     * @param $port
+     * @param $clientid
+     * @param null $cafile
+     */
+    public function broker($address, $port, $clientid, $cafile = null): void
+    {
+        $this->address = $address;
+        $this->port = $port;
+        $this->clientid = $clientid;
+        $this->cafile = $cafile;
+    }
 
-						if ($result && mysqli_num_rows($result) > 0) {
-							$row = mysqli_fetch_assoc($result);
-							$total_slots = $row['total_slots'];
-						} else {
-							$total_slots = 0;
-						}
+    /**
+     * Will try and connect, if fails it will sleep 10s and try again, this will enable the script to recover from a network outage
+     *
+     * @param bool $clean - should the client send a clean session flag
+     * @param null $will
+     * @param null $username
+     * @param null $password
+     *
+     * @return bool
+     */
+    public function connect_auto($clean = true, $will = null, $username = null, $password = null): bool
+    {
+        while ($this->connect($clean, $will, $username, $password) === false) {
+            sleep(10);
+        }
+        return true;
+    }
 
-	                    // Lấy tổng số lượng slot đã có xe đỗ
-						$sql = "SELECT COUNT(*) AS occupied FROM parkinghistory WHERE TimeOut IS NULL";
-						$result = mysqli_query($conn, $sql);
+    /**
+     * @param bool $clean - should the client send a clean session flag
+     * @param null $will
+     * @param null $username
+     * @param null $password
+     *
+     * @return bool
+     */
+    public function connect($clean = true, $will = null, $username = null, $password = null): bool
+    {
+        if ($will) {
+            $this->will = $will;
+        }
+        if ($username) {
+            $this->username = $username;
+        }
+        if ($password) {
+            $this->password = $password;
+        }
 
-						if ($result && mysqli_num_rows($result) > 0) {
-							$row = mysqli_fetch_assoc($result);
-							$occupied_slots = $row['occupied'];
-						} else {
-							$occupied_slots = 0;
-						}
+        if ($this->cafile) {
+            $socketContext = stream_context_create(
+                [
+                    'ssl' => [
+                        'verify_peer_name' => true,
+                        'cafile' => $this->cafile
+                    ]
+                ]
+            );
+            $this->socket = stream_socket_client('tls://' . $this->address . ':' . $this->port, $errno, $errstr, 60, STREAM_CLIENT_CONNECT, $socketContext);
+        } else {
+            $this->socket = stream_socket_client('tcp://' . $this->address . ':' . $this->port, $errno, $errstr, 60, STREAM_CLIENT_CONNECT);
+        }
 
-						$available_slots = $total_slots - $occupied_slots;
-	                  
-	                            
-	                ?>
-	                <!-- print environmental data -->
-	                <div style="color: white; text-align: left;">   				
-					
-		                <ul style="list-style-type:disc;">
-						  	<li>Total slots: <?php echo $total_slots;?>	</li>
-						  	<li>Available: <?php echo $available_slots;?></li>
-						  	<li>Occupied: <?php echo $occupied_slots;?></li>
-						</ul>  
-	            	</div>
-					
-				</div> <!-- end of system refresh -->
-				<button id="data_detail" class="btn btn-info" style="font-size: 15px;">Details</button>
-			</div>	
-			<div style="text-align: center; padding: 5px">
-				<button id="shutdown_pi" class="btn btn-primary" style="height: 50px; width: 70px; background-color: #006289; border-color: #006289;" data-toggle="tooltip" title="Shutdown system!"><img style="height: 40px;" src="image/shutdown.png"></button>
-				<button id="restart_pi" class="btn btn-primary" style="height: 50px; width: 70px; background-color: #006289; border-color: #006289;" data-toggle="tooltip" title="Restart system!" data-placement="top"><img style="height: 40px;" src="image/restart.png"></button>
-			</div>		
-			
-			
-		</div> <!-- end of col-3 -->	
-		<div class="row" style="margin-top: 20px;">
-			<div class="col-sm-12">
-				<h2 class="sub-1" style="text-align: center;">
-					TOTAL AVAILABLE SLOTS: <span id="available-count">0</span>
-				</h2>
-			</div>
-			<div class="col-sm-12" style="display: flex; justify-content: center;">
-				<div class="parking-area" 
-					style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff; display: flex; justify-content: center; width: 90%; box-sizing: border-box;">
-					<div id="slot-container" 
-						style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; justify-items: center; width: 100%; max-width: 900px;">
-					</div>
-				</div>
-			</div>
-		</div>
-    </div>			
-	</div> <!--End of row section -->
-</div> <!--End of wrap section -->
-<script type="text/javascript">
-	const slotContainer = document.getElementById("slot-container");
-	async function fetchSlotsFromDB() {
-		try {
-			// Lấy danh sách tất cả slot
-			const slotsRes = await fetch('services/get_slot.php');
-			const slots = await slotsRes.json(); // ["A1", "A2", ...]
+        if (!$this->socket) {
+            $this->_errorMessage("stream_socket_create() $errno, $errstr");
+            return false;
+        }
 
-			// Lấy danh sách slot bị occupied
-			const occupiedRes = await fetch('services/get_occupied.php');
-			const occupiedSlots = await occupiedRes.json(); // ["A2", "B3", ...]
+        stream_set_timeout($this->socket, 5);
+        stream_set_blocking($this->socket, 0);
 
-			slotContainer.innerHTML = "";
-			let availableCount = 0;
+        $i = 0;
+        $buffer = '';
 
-			slots.forEach((slotName, index) => {
-				const slotDiv = document.createElement("div");
-				slotDiv.className = "slot";
-				slotDiv.id = `slot-${index + 1}`;
-				slotDiv.style.border = "1px solid #ccc";
-				slotDiv.style.borderRadius = "8px";
-				slotDiv.style.padding = "10px";
+        $buffer .= chr(0x00);
+        $i++; // Length MSB
+        $buffer .= chr(0x04);
+        $i++; // Length LSB
+        $buffer .= chr(0x4d);
+        $i++; // M
+        $buffer .= chr(0x51);
+        $i++; // Q
+        $buffer .= chr(0x54);
+        $i++; // T
+        $buffer .= chr(0x54);
+        $i++; // T
+        $buffer .= chr(0x04);
+        $i++; // // Protocol Level
 
-				if (occupiedSlots.includes(slotName)) {
-					// Slot bị chiếm
-					slotDiv.style.background = "#ffcccc"; // đỏ nhạt
-					slotDiv.innerHTML = `
-						<h4>${slotName}</h4>
-						<p>Status: <strong style="color:red;">Occupied</strong></p>
-					`;
-				} else {
-					// Slot trống
-					slotDiv.style.background = "#ccffcc"; // xanh nhạt
-					slotDiv.innerHTML = `
-						<h4>${slotName}</h4>
-						<p>Status: <strong style="color:green;">Available</strong></p>
-					`;
-					availableCount++;
-				}
+        //No Will
+        $var = 0;
+        if ($clean) {
+            $var += 2;
+        }
 
-				slotContainer.appendChild(slotDiv);
-			});
+        //Add will info to header
+        if ($this->will !== null) {
+            $var += 4; // Set will flag
+            $var += ($this->will['qos'] << 3); //Set will qos
+            if ($this->will['retain']) {
+                $var += 32;
+            } //Set will retain
+        }
 
-			// Hiển thị số slot trống
-			document.getElementById("available-count").textContent = availableCount;
+        if ($this->username !== null) {
+            $var += 128;
+        }    //Add username to header
+        if ($this->password !== null) {
+            $var += 64;
+        }    //Add password to header
 
-		} catch (error) {
-			console.error("Lỗi lấy slot từ DB:", error);
-		}
-	}
+        $buffer .= chr($var);
+        $i++;
 
-// Gọi hàm khi load trang
-	fetchSlotsFromDB();
+        //Keep alive
+        $buffer .= chr($this->keepalive >> 8);
+        $i++;
+        $buffer .= chr($this->keepalive & 0xff);
+        $i++;
 
-	</script>
+        $buffer .= $this->strwritestring($this->clientid, $i);
 
-	<!-- real time -->
-	<script>
-		var myVar = setInterval(myTimer, 1000);
-		function myTimer() {
-			var d = new Date();
-			document.getElementById("system_timer").innerHTML = d.toLocaleTimeString();
-		}
-		</script>
+        //Adding will to payload
+        if ($this->will !== null) {
+            $buffer .= $this->strwritestring($this->will['topic'], $i);
+            $buffer .= $this->strwritestring($this->will['content'], $i);
+        }
 
-		<script type="text/javascript">
-		setInterval("my_function();",5000); 
-		function my_function(){
-			$('#system_refresh').load(location.href + ' #system_refresh');
-		}
-	</script>
+        if ($this->username !== null) {
+            $buffer .= $this->strwritestring($this->username, $i);
+        }
+        if ($this->password !== null) {
+            $buffer .= $this->strwritestring($this->password, $i);
+        }
 
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
-	<!-- <script src="php/conn2.php"></script> -->
-	<!-- <script src="php/mainfunction.php"></script>	 -->
+        $head = chr(0x10);
 
-<?php require_once("includes/footer.php"); ?> 
+        while ($i > 0) {
+            $encodedByte = $i % 128;
+            $i /= 128;
+            $i = (int)$i;
+            if ($i > 0) {
+                $encodedByte |= 128;
+            }
+            $head .= chr($encodedByte);
+        }
 
-			
+        fwrite($this->socket, $head, 2);
+        fwrite($this->socket, $buffer);
+
+        $string = $this->read(4);
+
+        if (ord($string[0]) >> 4 === 2 && $string[3] === chr(0)) {
+            $this->_debugMessage('Connected to Broker');
+        } else {
+            $this->_errorMessage(
+                sprintf(
+                    "Connection failed! (Error: 0x%02x 0x%02x)\n",
+                    ord($string[0]),
+                    ord($string[3])
+                )
+            );
+            return false;
+        }
+
+        $this->timesinceping = time();
+
+        return true;
+    }
+
+    /**
+     * Reads in so many bytes
+     *
+     * @param int $int
+     * @param bool $nb
+     *
+     * @return false|string
+     */
+    public function read($int = 8192, $nb = false)
+    {
+        $string = '';
+        $togo = $int;
+
+        if ($nb) {
+            return fread($this->socket, $togo);
+        }
+
+        while (!feof($this->socket) && $togo > 0) {
+            $fread = fread($this->socket, $togo);
+            $string .= $fread;
+            $togo = $int - strlen($string);
+        }
+
+        return $string;
+    }
+
+    /**
+     * Subscribes to a topic, wait for message and return it
+     *
+     * @param $topic
+     * @param $qos
+     *
+     * @return string
+     */
+    public function subscribeAndWaitForMessage($topic, $qos): string
+    {
+        $this->subscribe(
+            [
+                $topic => [
+                    'qos' => $qos,
+                    'function' => '__direct_return_message__'
+                ]
+            ]
+        );
+
+        do {
+            $return = $this->proc();
+        } while ($return === true);
+
+        return $return;
+    }
+
+    /**
+     * subscribes to topics
+     *
+     * @param $topics
+     * @param int $qos
+     */
+    public function subscribe($topics, $qos = 0): void
+    {
+        $i = 0;
+        $buffer = '';
+        $id = $this->msgid;
+        $buffer .= chr($id >> 8);
+        $i++;
+        $buffer .= chr($id % 256);
+        $i++;
+
+        foreach ($topics as $key => $topic) {
+            $buffer .= $this->strwritestring($key, $i);
+            $buffer .= chr($topic['qos']);
+            $i++;
+            $this->topics[$key] = $topic;
+        }
+
+        $cmd = 0x82;
+        //$qos
+        $cmd += ($qos << 1);
+
+        $head = chr($cmd);
+        $head .= $this->setmsglength($i);
+        fwrite($this->socket, $head, strlen($head));
+
+        $this->_fwrite($buffer);
+        $string = $this->read(2);
+
+        $bytes = ord(substr($string, 1, 1));
+        $this->read($bytes);
+    }
+
+    /**
+     * Sends a keep alive ping
+     */
+    public function ping(): void
+    {
+        $head = chr(0xc0);
+        $head .= chr(0x00);
+        fwrite($this->socket, $head, 2);
+        $this->timesinceping = time();
+        $this->_debugMessage('ping sent');
+    }
+
+    /**
+     *  sends a proper disconnect cmd
+     */
+    public function disconnect(): void
+    {
+        $head = ' ';
+        $head[0] = chr(0xe0);
+        $head[1] = chr(0x00);
+        fwrite($this->socket, $head, 2);
+    }
+
+    /**
+     * Sends a proper disconnect, then closes the socket
+     */
+    public function close(): void
+    {
+        $this->disconnect();
+        stream_socket_shutdown($this->socket, STREAM_SHUT_WR);
+    }
+
+    /**
+     * Publishes $content on a $topic
+     *
+     * @param $topic
+     * @param $content
+     * @param int $qos
+     * @param bool $retain
+     */
+    public function publish($topic, $content, $qos = 0, $retain = false): void
+    {
+        $i = 0;
+        $buffer = '';
+
+        $buffer .= $this->strwritestring($topic, $i);
+
+        if ($qos) {
+            $id = $this->msgid++;
+            $buffer .= chr($id >> 8);
+            $i++;
+            $buffer .= chr($id % 256);
+            $i++;
+        }
+
+        $buffer .= $content;
+        $i += strlen($content);
+
+        $head = ' ';
+        $cmd = 0x30;
+        if ($qos) {
+            $cmd += $qos << 1;
+        }
+        if (empty($retain) === false) {
+            ++$cmd;
+        }
+
+        $head[0] = chr($cmd);
+        $head .= $this->setmsglength($i);
+
+        fwrite($this->socket, $head, strlen($head));
+        $this->_fwrite($buffer);
+    }
+
+    /**
+     * Writes a string to the socket
+     *
+     * @param $buffer
+     *
+     * @return bool|int
+     */
+    protected function _fwrite($buffer)
+    {
+        $buffer_length = strlen($buffer);
+        for ($written = 0; $written < $buffer_length; $written += $fwrite) {
+            $fwrite = fwrite($this->socket, substr($buffer, $written));
+            if ($fwrite === false) {
+                return false;
+            }
+        }
+        return $buffer_length;
+    }
+
+    /**
+     * Processes a received topic
+     *
+     * @param $msg
+     *
+     * @retrun bool|string
+     */
+    public function message($msg)
+    {
+        $tlen = (ord($msg[0]) << 8) + ord($msg[1]);
+        $topic = substr($msg, 2, $tlen);
+        $msg = substr($msg, ($tlen + 2));
+        $found = false;
+        foreach ($this->topics as $key => $top) {
+            if (preg_match(
+                '/^' . str_replace(
+                    '#',
+                    '.*',
+                    str_replace(
+                        '+',
+                        "[^\/]*",
+                        str_replace(
+                            '/',
+                            "\/",
+                            str_replace(
+                                '$',
+                                '\$',
+                                $key
+                            )
+                        )
+                    )
+                ) . '$/',
+                $topic
+            )) {
+                $found = true;
+
+                if ($top['function'] === '__direct_return_message__') {
+                    return $msg;
+                }
+
+                if (is_callable($top['function'])) {
+                    call_user_func($top['function'], $topic, $msg);
+                } else {
+                    $this->_errorMessage('Message received on topic ' . $topic . ' but function is not callable.');
+                }
+            }
+        }
+
+        if ($found === false) {
+            $this->_debugMessage('msg received but no match in subscriptions');
+        }
+
+        return $found;
+    }
+
+    /**
+     * The processing loop for an "always on" client
+     * set true when you are doing other stuff in the loop good for
+     * watching something else at the same time
+     *
+     * @param bool $loop
+     *
+     * @return bool | string
+     */
+    public function proc(bool $loop = true)
+    {
+        if (feof($this->socket)) {
+            $this->_debugMessage('eof receive going to reconnect for good measure');
+            fclose($this->socket);
+            $this->connect_auto(false);
+            if (count($this->topics)) {
+                $this->subscribe($this->topics);
+            }
+        }
+
+        $byte = $this->read(1, true);
+
+        if ((string)$byte === '') {
+            if ($loop === true) {
+                usleep(100000);
+            }
+        } else {
+            $cmd = (int)(ord($byte) / 16);
+            $this->_debugMessage(
+                sprintf(
+                    'Received CMD: %d (%s)',
+                    $cmd,
+                    isset(static::$known_commands[$cmd]) === true ? static::$known_commands[$cmd] : 'Unknown'
+                )
+            );
+
+            $multiplier = 1;
+            $value = 0;
+            do {
+                $digit = ord($this->read(1));
+                $value += ($digit & 127) * $multiplier;
+                $multiplier *= 128;
+            } while (($digit & 128) !== 0);
+
+            $this->_debugMessage('Fetching: ' . $value . ' bytes');
+
+            $string = $value > 0 ? $this->read($value) : '';
+
+            if ($cmd) {
+                switch ($cmd) {
+                    case 3: //Publish MSG
+                        $return = $this->message($string);
+                        if (is_bool($return) === false) {
+                            return $return;
+                        }
+                        break;
+                }
+            }
+        }
+
+        if ($this->timesinceping < (time() - $this->keepalive)) {
+            $this->_debugMessage('not had something in a while so ping');
+            $this->ping();
+        }
+
+        if ($this->timesinceping < (time() - ($this->keepalive * 2))) {
+            $this->_debugMessage('not seen a packet in a while, disconnecting/reconnecting');
+            fclose($this->socket);
+            $this->connect_auto(false);
+            if (count($this->topics)) {
+                $this->subscribe($this->topics);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets the length of a msg, (and increments $i)
+     *
+     * @param $msg
+     * @param $i
+     *
+     * @return float|int
+     */
+    protected function getmsglength(&$msg, &$i)
+    {
+        $multiplier = 1;
+        $value = 0;
+        do {
+            $digit = ord($msg[$i]);
+            $value += ($digit & 127) * $multiplier;
+            $multiplier *= 128;
+            $i++;
+        } while (($digit & 128) !== 0);
+
+        return $value;
+    }
+
+    /**
+     * @param $len
+     *
+     * @return string
+     */
+    protected function setmsglength($len): string
+    {
+        $string = '';
+        do {
+            $digit = $len % 128;
+            $len >>= 7;
+            // if there are more digits to encode, set the top bit of this digit
+            if ($len > 0) {
+                $digit |= 0x80;
+            }
+            $string .= chr($digit);
+        } while ($len > 0);
+        return $string;
+    }
+
+    /**
+     * @param $str
+     * @param $i
+     *
+     * @return string
+     */
+    protected function strwritestring($str, &$i): string
+    {
+        $len = strlen($str);
+        $msb = $len >> 8;
+        $lsb = $len % 256;
+        $ret = chr($msb);
+        $ret .= chr($lsb);
+        $ret .= $str;
+        $i += ($len + 2);
+        return $ret;
+    }
+
+    /**
+     * Prints a sting out character by character
+     *
+     * @param $string
+     */
+    public function printstr($string): void
+    {
+        $strlen = strlen($string);
+        for ($j = 0; $j < $strlen; $j++) {
+            $num = ord($string[$j]);
+            if ($num > 31) {
+                $chr = $string[$j];
+            } else {
+                $chr = ' ';
+            }
+            printf("%4d: %08b : 0x%02x : %s \n", $j, $num, $num, $chr);
+        }
+    }
+
+    /**
+     * @param string $message
+     */
+    protected function _debugMessage(string $message): void
+    {
+        if ($this->debug === true) {
+            echo date('r: ') . $message . PHP_EOL;
+        }
+    }
+
+    /**
+     * @param string $message
+     */
+    protected function _errorMessage(string $message): void
+    {
+        error_log('Error:' . $message);
+    }
+}
