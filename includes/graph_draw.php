@@ -69,7 +69,7 @@ $rfidCards = mysqli_fetch_all($result, MYSQLI_ASSOC);
         </thead>
         <tbody>
             <?php foreach ($parkingSlots as $index => $slot): ?>
-                <tr class="<?= $index >= 3 ? 'hidden-row' : '' ?>">
+                <tr class="<?= $index >= 4 ? 'hidden-row' : '' ?>">
                     <td><?= htmlspecialchars($slot['SlotName']) ?></td>
                     <td><?= $slot['Status'] ? 'Occupied' : 'Available' ?></td>
                     <td><?= htmlspecialchars($slot['CurrentRFID']) ?></td>
@@ -77,7 +77,7 @@ $rfidCards = mysqli_fetch_all($result, MYSQLI_ASSOC);
             <?php endforeach; ?>
         </tbody>
     </table>
-    <?php if (count($parkingSlots) > 3): ?>
+    <?php if (count($parkingSlots) > 4): ?>
         <button id="seeMoreBtn" class="btn btn-primary">See More</button>
     <?php endif; ?>
 </div>

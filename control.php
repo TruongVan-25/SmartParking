@@ -50,7 +50,7 @@
 				</div>
 				<div class="col-sm-6">
 					<h4>Exit gate</h4>
-					<iframe width="100%" height="240" style="border: 2px solid red; border-radius: 5px" src="http://172.16.10.70:81/stream"></iframe>
+					<iframe width="100%" height="240" style="border: 2px solid red; border-radius: 5px" src="http://172.16.10.170:81/stream"></iframe>
 				</div>
 			</div>
 
