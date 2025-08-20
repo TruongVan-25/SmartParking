@@ -60,7 +60,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 			<!-- chỗ này để số lượng chỗ đã đỗ, còn trống, trên tổng số -->
 			<h1 class="sub-1">OVERALL STATUS</h1>
 			<div class="center">
-				<p style="color: orange; font-weight: bold; text-align: center;">System Time: <span
+<p style="color: orange; font-weight: bold; text-align: center;">System Time: <span
 						id="system_timer"></span></p>
 				<div id="system_refresh">
 					<?php
@@ -78,7 +78,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 					}
 
 					// Lấy tổng số lượng slot đã có xe đỗ
-					$sql = "SELECT COUNT(*) AS occupied FROM parkinghistory WHERE TimeOut IS NULL";
+					$sql = "SELECT COUNT(*) AS occupied FROM parkingslot WHERE Status = 1";
 					$result = mysqli_query($conn, $sql);
 
 					if ($result && mysqli_num_rows($result) > 0) {
@@ -101,7 +101,6 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 							<li>Occupied: <?php echo $occupied_slots; ?></li>
 						</ul>
 					</div>
-
 				</div> <!-- end of system refresh -->
 				<button id="data_detail" class="btn btn-info" style="font-size: 15px;">Details</button>
 			</div>
