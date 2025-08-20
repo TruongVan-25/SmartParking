@@ -7,7 +7,7 @@ $username = "";
 $password = ""; 
 $client_id = "php_control_".uniqid();
 
-$topic = "parking/#";
+$topic = "parking/gate/cmd";
 
 if (isset($_POST['action'])) {
     $action = $_POST['action']; // OPEN hoặc CLOSE
