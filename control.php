@@ -76,7 +76,7 @@
 						}
 
 	                    // Lấy tổng số lượng slot đã có xe đỗ
-						$sql = "SELECT COUNT(*) AS occupied FROM parkinghistory WHERE TimeOut IS NULL";
+						$sql = "SELECT COUNT(*) AS occupied FROM parkingslot WHERE Status = 1";
 						$result = mysqli_query($conn, $sql);
 
 						if ($result && mysqli_num_rows($result) > 0) {
