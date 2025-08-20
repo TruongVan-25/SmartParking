@@ -109,6 +109,31 @@ function procMsg($topic, $msg){
             $free = intval($msg);
             logMsg("ℹ Free slots count: $free");
         }
+        else if ($topic == "parking/rfid") {
+            global $mqtt;
+            if (strpos($msg, "EXIT:") === 0) {
+                $rfid = substr($msg, 5); // Lấy mã RFID
+
+                // Kiểm tra RFID trong DB
+                $rfid_safe = $db->real_escape_string($rfid);
+                $result = $db->query("SELECT RFID FROM rfidcard WHERE RFID = '$rfid_safe'");
+
+                if ($result && $result->num_rows > 0) {
+                    $response = $rfid . ":yes";
+                } else {
+                    $response = $rfid . ":no";
+                }
+
+                // Publish kết quả
+                $mqtt->publish("parking/rfid/auth", $response, 0);
+                logMsg("🔄 Checked RFID {$rfid} → {$response}");
+            } else if ($msg === "OPEN") {
+                logMsg("📡 Received OPEN command");
+            } else {
+                logMsg("⚠ Invalid RFID message: $msg");
+            }
+        }
+
 
     } catch(Exception $e){
         logMsg("❌ Error: ".$e->getMessage());
