@@ -7,8 +7,9 @@ set_time_limit(0); // chạy liên tục
 ob_implicit_flush(true);
 
 // Hàm log ra web
-function logMsg($msg){
-    echo "[".date("Y-m-d H:i:s")."] " . htmlspecialchars($msg) . "<br>\n";
+function logMsg($msg)
+{
+    echo "[" . date("Y-m-d H:i:s") . "] " . htmlspecialchars($msg) . "<br>\n";
     ob_flush();
     flush();
 }
@@ -16,36 +17,38 @@ function logMsg($msg){
 // Kết nối DB
 try {
     $db = new mysqli("localhost", "smartparking", "cyber@2025", "smart_parking");
-    if ($db->connect_error) throw new Exception("DB connect failed: ".$db->connect_error);
+    if ($db->connect_error)
+        throw new Exception("DB connect failed: " . $db->connect_error);
     logMsg("✅ DB connected");
-} catch(Exception $e){
-    logMsg("❌ ".$e->getMessage());
+} catch (Exception $e) {
+    logMsg("❌ " . $e->getMessage());
     exit;
 }
 
 // Kết nối MQTT
-$server = "172.16.2.4";     
+$server = "172.16.2.4";
 $port = 1883;
-$username = "";             
+$username = "";
 $password = "";
-$client_id = "php_control_".uniqid();
+$client_id = "php_control_" . uniqid();
 
 try {
     $mqtt = new Bluerhinos\phpMQTT($server, $port, $client_id);
-    if(!$mqtt->connect(true, NULL, $username, $password)) throw new Exception("Cannot connect to MQTT Broker");
+    if (!$mqtt->connect(true, NULL, $username, $password))
+        throw new Exception("Cannot connect to MQTT Broker");
     logMsg("✅ MQTT connected to $server:$port");
-} catch(Exception $e){
-    logMsg("❌ ".$e->getMessage());
+} catch (Exception $e) {
+    logMsg("❌ " . $e->getMessage());
     exit;
 }
 
 // Đăng ký topic
-$topics['parking/#'] = array("qos"=>0, "function"=>"procMsg");
+$topics['parking/#'] = array("qos" => 0, "function" => "procMsg");
 $mqtt->subscribe($topics, 0);
 logMsg("➡ Subscribed to topics: parking/#");
 
 // Vòng lặp nhận tin
-while($mqtt->proc()){
+while ($mqtt->proc()) {
     // giữ script chạy liên tục
 }
 
@@ -54,33 +57,39 @@ logMsg("MQTT connection closed");
 
 
 // Hàm xử lý tin nhắn
-function procMsg($topic, $msg){
+function procMsg($topic, $msg)
+{
     global $db;
     logMsg("📩 Received [$topic]: $msg");
 
     try {
         // 1. Trạng thái từng slot
         if (preg_match('/^parking\/slot\/(.+)\/status$/', $topic, $m)) {
-            $slotCode = $db->real_escape_string($m[1]); 
+            $slotCode = $db->real_escape_string($m[1]);
             $status = ($msg == "O") ? 1 : 0;
 
-            if(!$db->query("UPDATE parkingslot SET Status=$status WHERE SlotCode='$slotCode'")) {
-                throw new Exception("DB update parkingslot failed: ".$db->error);
+            if (!$db->query("UPDATE parkingslot SET Status=$status WHERE SlotCode='$slotCode'")) {
+                throw new Exception("DB update parkingslot failed: " . $db->error);
             }
             logMsg("✅ Slot $slotCode updated to status $status");
         }
 
         // 2. Log cổng
         else if ($topic == "parking/gate/status") {
-            if (strpos($msg, "ENTRY") === 0) $gateType = "ENTRY";
-            else if (strpos($msg, "EXIT") === 0) $gateType = "EXIT";
-            else $gateType = "UNKNOWN";
+            if (strpos($msg, "ENTRY") === 0)
+                $gateType = "ENTRY";
+            else if (strpos($msg, "EXIT") === 0)
+                $gateType = "EXIT";
+            else
+                $gateType = "UNKNOWN";
 
             $action = (strpos($msg, "OPEN") !== false) ? "Open" : "Close";
 
-            if(!$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
-                            VALUES('$gateType', '$action', NOW(), 'SYSTEM')")) {
-                throw new Exception("DB insert gatelog failed: ".$db->error);
+            if (
+                !$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
+                            VALUES('$gateType', '$action', NOW(), 'SYSTEM')")
+            ) {
+                throw new Exception("DB insert gatelog failed: " . $db->error);
             }
             logMsg("✅ Gate log: $gateType - $action");
         }
@@ -94,9 +103,11 @@ function procMsg($topic, $msg){
                 $by = $db->real_escape_string($data['by']);
                 $time = date("Y-m-d H:i:s");
 
-                if(!$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
-                                VALUES('$gate', '$action', '$time', '$by')")) {
-                    throw new Exception("DB insert gatelog failed: ".$db->error);
+                if (
+                    !$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
+                                VALUES('$gate', '$action', '$time', '$by')")
+                ) {
+                    throw new Exception("DB insert gatelog failed: " . $db->error);
                 }
                 logMsg("✅ JSON Gate log inserted: $gate - $action by $by");
             } else {
@@ -150,7 +161,7 @@ function procMsg($topic, $msg){
         }
 
 
-    } catch(Exception $e){
-        logMsg("❌ Error: ".$e->getMessage());
+    } catch (Exception $e) {
+        logMsg("❌ Error: " . $e->getMessage());
     }
 }
