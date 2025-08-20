@@ -109,28 +109,43 @@ function procMsg($topic, $msg){
             $free = intval($msg);
             logMsg("ℹ Free slots count: $free");
         }
-        else if ($topic == "parking/rfid") {
-            global $mqtt;
-            if (strpos($msg, "EXIT:") === 0) {
-                $rfid = substr($msg, 5); // Lấy mã RFID
 
-                // Kiểm tra RFID trong DB
+        // 5. RFID card check auth
+        else if ($topic == "parking/rfid") {
+            global $mqtt; // để publish
+
+            // Nhận dạng ENTRY hoặc EXIT
+            if (preg_match('/^(ENTRY|EXIT):(.+)$/', $msg, $matches)) {
+                $gateType = $matches[1]; // ENTRY hoặc EXIT
+                $rfid = $matches[2];     // mã RFID
+
+                // Kiểm tra DB
                 $rfid_safe = $db->real_escape_string($rfid);
                 $result = $db->query("SELECT RFID FROM rfidcard WHERE RFID = '$rfid_safe'");
 
                 if ($result && $result->num_rows > 0) {
-                    $response = $rfid . ":yes";
+                    // Có trong DB
+                    $authMsg = $rfid . ":yes";
+                    $mqtt->publish("parking/rfid/auth", $authMsg, 0);
+                    logMsg("✅ RFID $rfid hợp lệ, gửi $authMsg");
+
+                    // Điều khiển mở cổng
+                    if ($gateType === "ENTRY") {
+                        $mqtt->publish("parking/gate/cmd", "OPEN_ENTRY", 0);
+                        logMsg("🚪 Mở cổng vào");
+                    } elseif ($gateType === "EXIT") {
+                        $mqtt->publish("parking/gate/cmd", "OPEN_EXIT", 0);
+                        logMsg("🚪 Mở cổng ra");
+                    }
                 } else {
-                    $response = $rfid . ":no";
+                    // Không có trong DB
+                    $authMsg = $rfid . ":no";
+                    $mqtt->publish("parking/rfid/auth", $authMsg, 0);
+                    logMsg("❌ RFID $rfid không hợp lệ, gửi $authMsg");
                 }
 
-                // Publish kết quả
-                $mqtt->publish("parking/rfid/auth", $response, 0);
-                logMsg("🔄 Checked RFID {$rfid} → {$response}");
-            } else if ($msg === "OPEN") {
-                logMsg("📡 Received OPEN command");
             } else {
-                logMsg("⚠ Invalid RFID message: $msg");
+                logMsg("⚠ Dữ liệu RFID không hợp lệ: $msg");
             }
         }
 
