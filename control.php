@@ -46,7 +46,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 				<div class="col-sm-6">
 					<h4>Entry gate</h4>
 					<iframe width="100%" height="240" style="border: 2px solid green; border-radius: 5px"
-						src="http://172.16.10.22/picam/cam_pic_new.php?pDelay=40000"></iframe>
+						src="https://iot.eiu.com.vn/picam/cam_pic_new.php?pDelay=40000"></iframe>
 				</div>
 				<div class="col-sm-6">
 					<h4>Exit gate</h4>
