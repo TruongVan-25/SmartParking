@@ -58,7 +58,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 		</div> <!-- end of col-6 -->
 		<div class="col-sm-3">
 			<!-- chỗ này để số lượng chỗ đã đỗ, còn trống, trên tổng số -->
-			<h1 class="sub-1">OVERALL STATUS</h1>
+			<h1 class="sub-1">OVERAL STATUS</h1>
 			<div class="center">
 <p style="color: orange; font-weight: bold; text-align: center;">System Time: <span
 						id="system_timer"></span></p>
@@ -117,18 +117,16 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 
 
 		</div> <!-- end of col-3 -->
-		<div class="row" style="margin-top: 20px;">
-			<div class="col-sm-12">
-				<h2 class="sub-1" style="text-align: center;">
-					TOTAL AVAILABLE SLOTS: <span id="available-count">0</span>
-				</h2>
-			</div>
-			<div class="col-sm-12" style="display: flex; justify-content: center;">
-				<div class="parking-area"
-					style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff; display: flex; justify-content: center; width: 90%; box-sizing: border-box;">
-					<div id="slot-container"
-						style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; justify-items: center; width: 100%; max-width: 900px;">
-					</div>
+		<div class="col-sm-12">
+			<h2 class="sub-1" style="text-align: center;">
+				TOTAL AVAILABLE SLOTS: <span id="available-count">0</span>
+			</h2>
+		</div>
+		<div class="col-sm-12" style="display: flex; justify-content: center;">
+			<div class="parking-area"
+				style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff; display: inline-block; margin: 20px auto;">
+				<div id="slot-container"
+					style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; justify-items: center; width: 100%; max-width: 1200px;">
 				</div>
 			</div>
 		</div>
