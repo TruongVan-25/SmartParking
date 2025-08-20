@@ -2,10 +2,10 @@
 require("phpMQTT.php"); // Thư viện MQTT
 
 $server = "172.16.2.4"; // MQTT broker IP
-$port = 1883; 
-$username = ""; 
-$password = ""; 
-$client_id = "php_control_".uniqid();
+$port = 1883;
+$username = "";
+$password = "";
+$client_id = "php_control_" . uniqid();
 
 $topic = "parking/gate/cmd";
 
