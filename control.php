@@ -127,7 +127,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 			<div class="parking-area"
 				style="border: 2px solid #ccc; padding: 10px; border-radius: 10px; background: #fff; display: inline-block; margin: 20px auto;">
 				<div id="slot-container"
-					style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; justify-items: center; width: 100%; max-width: 900px;">
+					style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; justify-items: center; width: 100%; max-width: 1200px;">
 				</div>
 			</div>
 		</div>
