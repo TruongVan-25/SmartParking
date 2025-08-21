@@ -2,10 +2,10 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th8 20, 2025 lúc 09:14 AM
--- Phiên bản máy phục vụ: 10.4.24-MariaDB
--- Phiên bản PHP: 7.4.29
+-- Host: 127.0.0.1
+-- Generation Time: Aug 20, 2025 at 10:51 AM
+-- Server version: 10.4.24-MariaDB
+-- PHP Version: 7.4.29
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,17 +18,17 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `smart_parking`
+-- Database: `smart_parking`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `gatelog`
+-- Table structure for table `gatelog`
 --
 
 CREATE TABLE `gatelog` (
-  `LogID` int(20) NOT NULL,
+  `LogID` bigint(20) NOT NULL,
   `GateType` varchar(10) DEFAULT NULL,
   `Action` varchar(10) DEFAULT NULL,
   `Time` datetime DEFAULT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `gatelog` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Đang đổ dữ liệu cho bảng `gatelog`
+-- Dumping data for table `gatelog`
 --
 
 INSERT INTO `gatelog` (`LogID`, `GateType`, `Action`, `Time`, `TriggeredBy`) VALUES
@@ -49,7 +49,7 @@ INSERT INTO `gatelog` (`LogID`, `GateType`, `Action`, `Time`, `TriggeredBy`) VAL
 (7, 'ENTRY', 'Open', '2025-08-18 17:34:40', 'SYSTEM'),
 (8, 'EXIT', 'ACCEPT', '2025-08-18 12:59:23', '90172383'),
 (9, 'EXIT', 'Open', '2025-08-18 17:59:23', 'SYSTEM'),
-(10, 'EXIT', 'OPEN', '2025-08-18 12:59:23', 'RFID'),
+(10, 'EXIT', 'OPEN', '2025-08-18 17:59:23', 'RFID'),
 (11, 'EXIT', 'Close', '2025-08-18 17:59:26', 'SYSTEM'),
 (12, 'EXIT', 'CLOSE', '2025-08-18 12:59:26', 'SYSTEM'),
 (13, 'ENTRY', 'ACCEPT', '2025-08-18 13:00:08', '90172383'),
@@ -140,7 +140,7 @@ INSERT INTO `gatelog` (`LogID`, `GateType`, `Action`, `Time`, `TriggeredBy`) VAL
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `information`
+-- Table structure for table `information`
 --
 
 CREATE TABLE `information` (
@@ -148,30 +148,27 @@ CREATE TABLE `information` (
   `Password` text NOT NULL,
   `Name` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `DateOfBirth` date NOT NULL,
-  `Address` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `PhoneNumber` varchar(20) DEFAULT NULL
+  `Address` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Đang đổ dữ liệu cho bảng `information`
+-- Dumping data for table `information`
 --
 
-INSERT INTO `information` (`Email`, `Password`, `Name`, `DateOfBirth`, `Address`, `PhoneNumber`) VALUES
-('vinh.phan@eiu.edu.vn', '123456', 'Vinh', '2018-10-10', 'Binh Duong', NULL),
-('khang.vo.k3set@eiu.edu.vn', '123456', 'duykhang', '1995-01-29', 'Binh Duong', NULL),
-('thanh.tran.k2000@gmail.com', '123456', 'Thanh', '1994-09-27', 'BD-BB', NULL),
-('pvvinhbk@gmail.com', 'abc@123', 'Vinh Phan', '1984-12-08', 'Phu Hoa, TDM, BD', NULL),
-('truongthivan2005@gmail.com', '123456', 'Trương Thị Vân', '0000-00-00', 'Thủ Dầu Một', '01636194138'),
-('trang.p.cit21@eiu.edu.vn', '123456', 'Phạm Nguyễn Bảo Trang', '0000-00-00', 'Thủ Dầu Một', '071273912');
+INSERT INTO `information` (`Email`, `Password`, `Name`, `DateOfBirth`, `Address`) VALUES
+('vinh.phan@eiu.edu.vn', '123456', 'Vinh', '2018-10-10', 'Binh Duong'),
+('khang.vo.k3set@eiu.edu.vn', '123456', 'duykhang', '1995-01-29', 'Binh Duong'),
+('thanh.tran.k2000@gmail.com', '123456', 'Thanh', '1994-09-27', 'BD-BB'),
+('pvvinhbk@gmail.com', 'abc@123', 'Vinh Phan', '1984-12-08', 'Phu Hoa, TDM, BD');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `parkinghistory`
+-- Table structure for table `parkinghistory`
 --
 
 CREATE TABLE `parkinghistory` (
-  `HistoryID` int(20) NOT NULL,
+  `HistoryID` bigint(20) NOT NULL,
   `RFID` varchar(20) DEFAULT NULL,
   `SlotID` int(11) DEFAULT NULL,
   `TimeIn` datetime DEFAULT NULL,
@@ -181,7 +178,7 @@ CREATE TABLE `parkinghistory` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Đang đổ dữ liệu cho bảng `parkinghistory`
+-- Dumping data for table `parkinghistory`
 --
 
 INSERT INTO `parkinghistory` (`HistoryID`, `RFID`, `SlotID`, `TimeIn`, `TimeOut`, `Duration`, `Fee`) VALUES
@@ -191,7 +188,7 @@ INSERT INTO `parkinghistory` (`HistoryID`, `RFID`, `SlotID`, `TimeIn`, `TimeOut`
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `parkingslot`
+-- Table structure for table `parkingslot`
 --
 
 CREATE TABLE `parkingslot` (
@@ -207,56 +204,61 @@ CREATE TABLE `parkingslot` (
 --
 
 INSERT INTO `parkingslot` (`SlotID`, `SlotCode`, `Area`, `Status`, `CurrentRFID`) VALUES
-(1, '1', 'A', 0, NULL),
+(1, '1', 'A', 1, NULL),
 (2, '2', 'A', 0, NULL),
 (3, '3', 'A', 0, NULL),
 (4, '4', 'A', 0, NULL),
-(5, '1', 'B', 0, NULL),
-(6, '2', 'B', 0, NULL),
-(7, '3', 'B', 0, NULL),
-(8, '4', 'B', 0, NULL),
-(9, '1', 'C', 0, NULL),
-(10, '2', 'C', 0, NULL),
-(11, '3', 'C', 0, NULL),
-(12, '4', 'C', 0, NULL),
-(13, '1', 'D', 0, NULL),
-(14, '2', 'D', 0, NULL),
-(15, '3', 'D', 0, NULL),
-(16, '4', 'D', 0, NULL);
+(5, '5', 'A', 0, NULL),
+(6, '1', 'B', 1, NULL),
+(7, '2', 'B', 0, NULL),
+(8, '3', 'B', 0, NULL),
+(9, '4', 'B', 0, NULL),
+(10, '5', 'B', 0, NULL),
+(11, '1', 'C', 0, NULL),
+(12, '2', 'C', 0, NULL),
+(13, '3', 'C', 0, NULL),
+(14, '4', 'C', 0, NULL),
+(15, '5', 'C', 0, NULL),
+(16, '1', 'D', 0, NULL),
+(17, '2', 'D', 0, NULL),
+(18, '3', 'D', 0, NULL),
+(19, '4', 'D', 0, NULL),
+(20, '5', 'D', 0, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `rfidcard`
+-- Table structure for table `rfidcard`
 --
 
 CREATE TABLE `rfidcard` (
   `RFID` varchar(20) NOT NULL,
   `OwnerName` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
   `VehiclePlate` varchar(15) DEFAULT NULL,
+  `PhoneNumber` varchar(15) DEFAULT NULL,
   `Type` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Đang đổ dữ liệu cho bảng `rfidcard`
+-- Dumping data for table `rfidcard`
 --
 
-INSERT INTO `rfidcard` (`RFID`, `OwnerName`, `VehiclePlate`, `Type`) VALUES
-('5E68200E', 'Phạm Nguyễn Bảo Trang', '61K - 7813129', 'SUV'),
-('90172383', 'Trương Thị Vân', '93A - 779312', 'Basic');
+INSERT INTO `rfidcard` (`RFID`, `OwnerName`, `VehiclePlate`, `PhoneNumber`, `Type`) VALUES
+('5E68200E', 'Phạm Nguyễn Bảo Trang', '61K - 7813129', '0665526556', 'SUV'),
+('90172383', 'Trương Thị Vân', '93A - 779312', '0125545167', 'Basic');
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `gatelog`
+-- Indexes for table `gatelog`
 --
 ALTER TABLE `gatelog`
   ADD PRIMARY KEY (`LogID`);
 
 --
--- Chỉ mục cho bảng `parkinghistory`
+-- Indexes for table `parkinghistory`
 --
 ALTER TABLE `parkinghistory`
   ADD PRIMARY KEY (`HistoryID`),
@@ -264,45 +266,45 @@ ALTER TABLE `parkinghistory`
   ADD KEY `SlotID` (`SlotID`);
 
 --
--- Chỉ mục cho bảng `parkingslot`
+-- Indexes for table `parkingslot`
 --
 ALTER TABLE `parkingslot`
   ADD PRIMARY KEY (`SlotID`);
 
 --
--- Chỉ mục cho bảng `rfidcard`
+-- Indexes for table `rfidcard`
 --
 ALTER TABLE `rfidcard`
   ADD PRIMARY KEY (`RFID`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `gatelog`
+-- AUTO_INCREMENT for table `gatelog`
 --
 ALTER TABLE `gatelog`
-  MODIFY `LogID` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+  MODIFY `LogID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
--- AUTO_INCREMENT cho bảng `parkinghistory`
+-- AUTO_INCREMENT for table `parkinghistory`
 --
 ALTER TABLE `parkinghistory`
-  MODIFY `HistoryID` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `HistoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT cho bảng `parkingslot`
+-- AUTO_INCREMENT for table `parkingslot`
 --
 ALTER TABLE `parkingslot`
-  MODIFY `SlotID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `SlotID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
--- Các ràng buộc cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Các ràng buộc cho bảng `parkinghistory`
+-- Constraints for table `parkinghistory`
 --
 ALTER TABLE `parkinghistory`
   ADD CONSTRAINT `parkinghistory_ibfk_1` FOREIGN KEY (`RFID`) REFERENCES `rfidcard` (`RFID`),
