@@ -64,9 +64,14 @@ function procMsg($topic, $msg)
 
     try {
         // 1. Trạng thái từng slot
-        if (preg_match('/^parking\/slot\/(.+)\/status$/', $topic, $m)) {
-$area = $db->real_escape_string($m[1]);
-            $slotCode = $db->real_escape_string($m[2]);
+        if (preg_match('/^parking\/slot\/([A-Z])(\d+)\/status$/', $topic, $m)) {
+            if (isset($m[1], $m[2])) {
+                $area = $db->real_escape_string($m[1]);
+                $slotCode = $db->real_escape_string($m[2]);
+            } else {
+                logMsg("⚠ Topic slot/status không hợp lệ: $topic");
+                return;
+            }
 
             $data = json_decode($msg, true);
             if ($data && isset($data['event'], $data['slot'], $data['status'])) {
@@ -142,19 +147,52 @@ $area = $db->real_escape_string($m[1]);
         // 3. Log JSON từ Wemos
         else if ($topic == "parking/log") {
             $data = json_decode($msg, true);
-            if ($data && isset($data['gate'], $data['action'], $data['by'])) {
-                $gate = $db->real_escape_string($data['gate']);
-                $action = $db->real_escape_string($data['action']);
-                $by = $db->real_escape_string($data['by']);
-                $time = date("Y-m-d H:i:s");
+            if (json_last_error() === JSON_ERROR_NONE && isset($data['event'])) {
+                if ($data['event'] === 'slot_change' && isset($data['slot'], $data['status'])) {
+                    $slotId = $db->real_escape_string($data['slot']); // Ví dụ "B1"
+                    $status = $data['status'];
 
-                if (
-                    !$db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) 
-                                VALUES('$gate', '$action', '$time', '$by')")
-                ) {
-                    throw new Exception("DB insert gatelog failed: " . $db->error);
+                    $area = substr($slotId, 0, 1); // "B"
+                    $slotCode = substr($slotId, 1); // "1"
+
+                    if ($status === "X") {
+                        // ENTRY
+                        $res = $db->query("SELECT SlotID FROM parkingslot WHERE Area='$area' AND SlotCode='$slotCode' LIMIT 1");
+                        if ($res && $row = $res->fetch_assoc()) {
+                            $slotIdNum = intval($row['SlotID']);
+                            $res2 = $db->query("SELECT RFID FROM parkinghistory WHERE SlotID IS NULL ORDER BY HistoryID DESC LIMIT 1");
+                            if ($res2 && $row2 = $res2->fetch_assoc()) {
+                                $rfid_last = $db->real_escape_string($row2['RFID']);
+                                $db->query("UPDATE parkinghistory SET SlotID=$slotIdNum WHERE SlotID IS NULL AND RFID='$rfid_last' ORDER BY HistoryID DESC LIMIT 1");
+                                $db->query("UPDATE parkingslot SET Status=1, CurrentRFID='$rfid_last' WHERE SlotID=$slotIdNum");
+                                logMsg("✅ Gán slot $slotId cho RFID $rfid_last (đang dùng)");
+                            }
+                        }
+                    } elseif ($status === "O") {
+                        // EXIT
+                        $res = $db->query("SELECT SlotID, CurrentRFID FROM parkingslot WHERE Area='$area' AND SlotCode='$slotCode' LIMIT 1");
+                        if ($res && $row = $res->fetch_assoc()) {
+                            $slotIdNum = intval($row['SlotID']);
+                            $rfid_exit = $row['CurrentRFID'];
+                            if ($rfid_exit) {
+                                $db->query("UPDATE parkinghistory SET TimeOut=NOW() WHERE RFID='$rfid_exit' AND TimeOut IS NULL ORDER BY HistoryID DESC LIMIT 1");
+                                $db->query("UPDATE parkingslot SET Status=0, CurrentRFID=NULL WHERE SlotID=$slotIdNum");
+                                logMsg("🚗 RFID $rfid_exit rời slot $slotId (slot trống)");
+                            }
+                        }
+                    }
                 }
-                logMsg("✅ JSON Gate log inserted: $gate - $action by $by");
+                // Giữ lại xử lý cũ cho log gate
+                elseif (isset($data['gate'], $data['action'], $data['by'])) {
+                    $gate = $db->real_escape_string($data['gate']);
+                    $action = $db->real_escape_string($data['action']);
+                    $by = $db->real_escape_string($data['by']);
+                    $time = date("Y-m-d H:i:s");
+                    $db->query("INSERT INTO gatelog(GateType, Action, Time, TriggeredBy) VALUES('$gate', '$action', '$time', '$by')");
+                    logMsg("✅ JSON Gate log inserted: $gate - $action by $by");
+                } else {
+                    logMsg("⚠ Unrecognized JSON: $msg");
+                }
             } else {
                 logMsg("⚠ Invalid JSON: $msg");
             }
@@ -197,6 +235,22 @@ $area = $db->real_escape_string($m[1]);
                     } elseif ($gateType === "EXIT") {
                         $mqtt->publish("parking/gate/cmd", "OPEN_EXIT", 0);
                         logMsg("🚪 Mở cổng ra");
+                        // Tìm SlotID đang chứa RFID này
+                        $res = $db->query("SELECT SlotID FROM parkingslot WHERE CurrentRFID='$rfid_safe' LIMIT 1");
+                        if ($res && $row = $res->fetch_assoc()) {
+                            $slotIdExit = intval($row['SlotID']);
+                            
+                            // Cập nhật TimeOut
+                            $db->query("UPDATE parkinghistory 
+                                        SET TimeOut=NOW() 
+                                        WHERE RFID='$rfid_safe' AND TimeOut IS NULL 
+                                        ORDER BY HistoryID DESC LIMIT 1");
+                            
+                            // Đánh dấu slot trống
+                            $db->query("UPDATE parkingslot SET Status=0, CurrentRFID=NULL WHERE SlotID=$slotIdExit");
+
+                            logMsg("🚗 RFID $rfid_safe rời SlotID $slotIdExit, cập nhật slot trống");
+                        }
                     }
                 } else {
                     // Không có trong DB
