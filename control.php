@@ -51,7 +51,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 				<div class="col-sm-6">
 					<h4>Exit gate</h4>
 					<iframe width="100%" height="240" style="border: 2px solid red; border-radius: 5px"
-						src="http://172.16.10.170:81/stream"></iframe>
+						src="http://172.16.10.170:81/stream"></iframe> <!-- 172.16.10.171:80 -->
 				</div>
 			</div>
 

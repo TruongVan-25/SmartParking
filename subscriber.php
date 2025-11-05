@@ -47,8 +47,6 @@ $irStatus = [
     'EXIT'  => null
 ];
 
-$slotStatus = [];
-
 // Đăng ký topic
 $topics['parking/#'] = array("qos" => 0, "function" => "procMsg");
 $mqtt->subscribe($topics, 0);
@@ -66,7 +64,7 @@ logMsg("MQTT connection closed");
 // Hàm xử lý tin nhắn
 function procMsg($topic, $msg)
 {
-    global $db, $mqtt, $pendingEntry, $irStatus, $slotStatus;
+    global $db, $mqtt, $pendingEntry, $irStatus;
     logMsg("📩 Received [$topic]: $msg");
 
     try {
@@ -99,16 +97,13 @@ function procMsg($topic, $msg)
             if (preg_match('/^(ENTRY|EXIT):(.+)$/', $msg, $matches)) {
                 $gateType = $matches[1]; // ENTRY hoặc EXIT
                 $rfid = $matches[2];     // mã RFID
-
-               
                 
                 // ✅ Kiểm tra IR trước khi xử lý
                 if ($irStatus[$gateType] !== "O") {
                     logMsg("⛔ IR $gateType không có xe (status={$irStatus[$gateType]}), bỏ qua RFID $rfid");
+                    $pendingEntry = null; // reset trạng thái entry
                     return; 
                 }
-
-                
 
                 // Kiểm tra DB
                 $rfid_safe = $db->real_escape_string($rfid);
@@ -124,19 +119,23 @@ function procMsg($topic, $msg)
                     if ($gateType === "ENTRY") {
 
                         // Kiểm tra xe đã ở trong bãi chưa
-                        $checkIn = $db->query("SELECT 1 FROM parkinghistory WHERE RFID='$rfid_safe' AND TimeOut IS NULL LIMIT 1");
+                        $checkIn = $db->query("
+                            SELECT 1 FROM parkinghistory 
+                            WHERE RFID='$rfid_safe' AND TimeOut IS NULL 
+                            UNION 
+                            SELECT 1 FROM parkingslot 
+                            WHERE CurrentRFID='$rfid_safe' LIMIT 1
+                        ");
                         if ($checkIn && $checkIn->num_rows > 0) {
                             logMsg("⛔ Xe RFID $rfid đã ở trong bãi, không mở cổng vào");
+                            $pendingEntry = null; // reset trạng thái entry
                             return; // Không xử lý tiếp
                         }
 
                         $mqtt->publish("parking/gate/cmd", "OPEN_ENTRY", 0);
                         logMsg("🚪 Mở cổng vào");
                         
-                        $pendingEntry = [
-                            'rfid' => $rfid_safe,
-                            'time' => time()
-                        ];
+                        $pendingEntry = $rfid_safe; 
 
                         if(!$db->query("INSERT INTO parkinghistory (RFID, SlotID, TimeIn) VALUES ('$rfid_safe', NULL, NOW())")) {
                             logMsg("❌ Lỗi insert parkinghistory: " . $db->error);
@@ -144,11 +143,11 @@ function procMsg($topic, $msg)
                             logMsg("✅ Đã thêm bản ghi parkinghistory cho RFID $rfid (ENTRY)");
                         }
                     } elseif ($gateType === "EXIT") {
-
                         // Kiểm tra xe có trong bãi không
-                        $checkOut = $db->query("SELECT 0 FROM parkinghistory WHERE RFID='$rfid_safe' AND TimeOut IS NULL LIMIT 1");
+                        $checkOut = $db->query("SELECT 1 FROM parkinghistory WHERE RFID='$rfid_safe' AND TimeOut IS NULL LIMIT 1");
                         if (!$checkOut || $checkOut->num_rows === 0) {
                             logMsg("⛔ RFID $rfid không có xe trong bãi, không mở cổng ra");
+                            $pendingEntry = null; // reset trạng thái entry
                             return; // Không xử lý tiếp
                         }
 
@@ -182,6 +181,7 @@ function procMsg($topic, $msg)
                     // Không có trong DB
                     $authMsg = $rfid . ":no";
                     $mqtt->publish("parking/rfid/auth", $authMsg, 0);
+                    $pendingEntry = null; // reset trạng thái entry
                     logMsg("❌ RFID $rfid không hợp lệ, gửi $authMsg");
                 }
 
@@ -202,20 +202,20 @@ function procMsg($topic, $msg)
                     $slotCode = substr($slotIdStr, 1);
 
                     // Chỉ xử lý ENTRY khi có pendingEntry
-                    if ($status === "X" && $pendingEntry && (time() - $pendingEntry['time'] <= 300)) {
+                    if ($status === "X" && $pendingEntry) {
                         $res = $db->query("SELECT SlotID FROM parkingslot WHERE Area='$area' AND SlotCode='$slotCode' LIMIT 1");
                         if ($res && $row = $res->fetch_assoc()) {
                             $slotIdNum = intval($row['SlotID']);
 
                             // Update bản ghi parkinghistory vừa tạo
                             $db->query("UPDATE parkinghistory SET SlotID=$slotIdNum 
-                                        WHERE RFID='{$pendingEntry['rfid']}' AND SlotID IS NULL 
+                                        WHERE RFID='$pendingEntry' AND SlotID IS NULL 
                                         ORDER BY HistoryID DESC LIMIT 1");
 
                             // Update trạng thái slot
-                            $db->query("UPDATE parkingslot SET Status=1, CurrentRFID='{$pendingEntry['rfid']}' WHERE SlotID=$slotIdNum");
+                            $db->query("UPDATE parkingslot SET Status=1, CurrentRFID='$pendingEntry' WHERE SlotID=$slotIdNum");
 
-                            logMsg("✅ Gán Slot $slotIdStr cho RFID {$pendingEntry['rfid']}");
+                            logMsg("✅ Gán Slot $slotIdStr cho RFID $pendingEntry");
                             $pendingEntry = null; // reset trạng thái
                         }
                     }
