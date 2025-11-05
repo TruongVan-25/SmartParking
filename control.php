@@ -75,17 +75,6 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 						</ul>
 					</div>
 				</div>
-				<button id="data_detail" class="btn btn-info" style="font-size: 15px;">Details</button>
-			</div>
-			<div style="text-align: center; padding: 5px">
-				<button id="shutdown_pi" class="btn btn-primary"
-					style="height: 50px; width: 70px; background-color: #006289; border-color: #006289;"
-					data-toggle="tooltip" title="Shutdown system!"><img style="height: 40px;"
-						src="image/shutdown.png"></button>
-				<button id="restart_pi" class="btn btn-primary"
-					style="height: 50px; width: 70px; background-color: #006289; border-color: #006289;"
-					data-toggle="tooltip" title="Restart system!" data-placement="top"><img style="height: 40px;"
-						src="image/restart.png"></button>
 			</div>
 		</div>
 
@@ -199,10 +188,10 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 				let message = "";
 				let color = "#4CAF50";
 
-				if (action === "OPEN_ENTRY") message = "Open Entrance successfully";
-				else if (action === "CLOSE_ENTRY") message = "Close Entrance successfully";
-				else if (action === "OPEN_EXIT") message = "Open Exit successfully";
-				else if (action === "CLOSE_EXIT") message = "Close Exit successfully";
+				if (action === "OPEN_ENTRY") message = "Open Entrance gate successfully";
+				else if (action === "CLOSE_ENTRY") message = "Close Entrance gate successfully";
+				else if (action === "OPEN_EXIT") message = "Open Exit gate successfully";
+				else if (action === "CLOSE_EXIT") message = "Close Exit gate successfully";
 				else {
 					message = "Unknown action";
 					color = "#f44336";
