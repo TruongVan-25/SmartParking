@@ -49,7 +49,7 @@ if ($_SESSION['LoginInto'] == "TRUE") {
 		</div>
 
 		<div class="col-sm-3">
-			<h1 class="sub-1">OVERAL STATUS</h1>
+			<h1 class="sub-1">OVERALL STATUS</h1>
 			<div class="center">
 				<p style="color: orange; font-weight: bold; text-align: center;">System Time: <span
 						id="system_timer"></span></p>
